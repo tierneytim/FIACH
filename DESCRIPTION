@@ -1,0 +1,16 @@
+Package: FIACH
+Type: Package
+Title: Retrospective Noise Control for fMRI
+Version: 0.1.1
+Date: 2015-09-17
+Author: Tim Tierney
+Maintainer: Tim Tierney <fiachmri@gmail.com>
+Repository: CRAN
+Description: Useful functions for fMRI preprocessing.
+License: GPL-2
+Depends: R (>= 3.2.0)
+Imports: Rcpp (>= 0.11.4), RNiftyReg (>= 2.0.0),tcltk, tkrplot, utils,
+        stats, graphics, grDevices
+LinkingTo: Rcpp, RcppArmadillo
+NeedsCompilation: yes
+Packaged: 2015-09-20 18:07:37 UTC; Nerevar
