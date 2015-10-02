@@ -88,7 +88,24 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
   ########### BHUEL NA BI AG CAOINE.            ##################
   ###########  !!!!!TA FIACH ANSEO ANOIS!!!!!   ##################
   ################################################################
+  
+  ######################################
+  ######## ARGUMENT CHECKS #############
+  ######################################
   if(nMads<0){stop("nMads must be a postive real number")}
+  if(t<0){stop("t must be 0 or a postive real number")}
+  if(tr<0){stop("tr must be a postive real number")}
+  if(maxgap<1){stop("maxgap must be greater than 1 ")}
+  if(freq<0){stop("freq must be a postive real number")}
+  if(!is.null(rp)){
+  if(!is.character(rp)){stop("rp should be a character strings")}
+  if(length(rp)>1){stop("Only one rp file should be specified")}
+  if(!file.exists(rp)){stop("The specified rp file does not exist")}
+  }
+  if(length(input)<1){stop("At least one functional file must be specified")}
+  if(!is.character(input)){stop("input should be character strings")}
+  exists<-file.exists(input)
+  if(!all(exists)){stop("At least one of the specified functional files does not exist")}
   #####################################
   ######## DATA READ ##################
   #####################################
