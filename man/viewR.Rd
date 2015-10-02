@@ -8,7 +8,7 @@ This function allows for interactive viewing of 3D and 4D medical Images.
 }
 
 \usage{
-viewR(data=NULL,ret=FALSE)
+viewR(data=NULL,xyz=NULL,ret=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
