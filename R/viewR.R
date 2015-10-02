@@ -1,4 +1,4 @@
-viewR<-function(data=NULL,ret=FALSE){
+viewR<-function(data=NULL,xyz=NULL,ret=FALSE){
   if(is.null(data)){
     file<-selectR()
     if(length(file)==0){stop("You must select a file")}
@@ -26,9 +26,14 @@ viewR<-function(data=NULL,ret=FALSE){
   d1<-d[1]
   d2<-d[2]
   d3<-d[3]
-  xx<-round(d1/2)
-  yy<-round(d2/2)
-  zz<-round(d3/2)
+  
+  xi<-xyz[1]
+  yi<-xyz[2]
+  zi<-xyz[3]
+  
+  xx <- ifelse(is.null(xi)||xi>d1||xi<1||!is.numeric(xi), round(d1/2), xi)
+  yy <- ifelse(is.null(yi)||yi>d2||yi<1||!is.numeric(xi), round(d2/2), yi)
+  zz <- ifelse(is.null(zi)||zi>d3||zi<1||!is.numeric(xi), round(d3/2), zi)
   if(length(d)>3){
     d4<-d[4]
   }else{
