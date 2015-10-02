@@ -88,7 +88,7 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
   ########### BHUEL NA BI AG CAOINE.            ##################
   ###########  !!!!!TA FIACH ANSEO ANOIS!!!!!   ##################
   ################################################################
-  
+  if(nMads<0){stop("nMads must be a postive real number")}
   #####################################
   ######## DATA READ ##################
   #####################################
