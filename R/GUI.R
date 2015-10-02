@@ -252,7 +252,8 @@ GUI<-function(){
               
               
               combine<-paste(dateChunk,B0Chunk,TEChunk,TRChunk,TChunk,madsChunk,freqChunk,gapChunk,funcChunk,rpChunk,processChunk,sep="\n")
-              direc<-as.character(tkchooseDirectory())
+              direc<-tkchooseDirectory()
+              direc<-paste(as.character(direc),collapse=" ")
               if(length(direc)>0){
                 output<-paste(direc,"/",gsub("(:|-| )","_",Sys.time()),"_","fiachBatch.r",sep="")
                 writeLines(combine,output)
