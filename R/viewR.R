@@ -544,7 +544,7 @@ viewR<-function(data=NULL,xyz=NULL,ret=FALSE){
     if(tclvalue(tmovie)==1){
       
       someFlag<<-TRUE
-      repeat_call(1,function() {tkinvoke(spin,"buttonup");tkrreplot(img4)})
+      repeat_call(1,function() {tkinvoke(spin,"buttonup")})
     }else{someFlag<<-FALSE}
   }
   tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie")
