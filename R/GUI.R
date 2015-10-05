@@ -226,8 +226,8 @@ GUI<-function(){
               processChunk<-paste(
                 "for(i in 1:length(rp)){",
                 "print(paste('Beginning subject',i))",
-                "if(rp[[i]]=='NA'){fiach(input=input[[i]],tr=tr,t=t,freq=freq,maxgap=maxgap)}else{",
-                "fiach(input=input[[i]],tr=tr,t=t,rp=rp[[i]],freq=freq,maxgap=maxgap)}",
+                "if(rp[[i]]=='NA'){fiach(input=input[[i]],tr=tr,t=t,freq=freq,maxgap=maxgap,nMads=nMads)}else{",
+                "fiach(input=input[[i]],tr=tr,t=t,rp=rp[[i]],freq=freq,maxgap=maxgap,nMads=nMads)}",
                 "print(paste('Completed subject',i))",
                 "}",sep="\n")
               
@@ -323,8 +323,8 @@ GUI<-function(){
               processChunk<-paste(
                 "for(i in 1:length(rp)){",
                 "print(paste('Beginning subject',i))",
-                "if(rp[[i]]=='NA'){fiach(input=input[[i]],tr=tr,t=t,freq=freq,maxgap=maxgap)}else{",
-                "fiach(input=input[[i]],tr=tr,t=t,rp=rp[[i]],freq=freq,maxgap=maxgap)}",
+                "if(rp[[i]]=='NA'){fiach(input=input[[i]],tr=tr,t=t,freq=freq,maxgap=maxgap,nMads=nMads)}else{",
+                "fiach(input=input[[i]],tr=tr,t=t,rp=rp[[i]],freq=freq,maxgap=maxgap,nMads=nMads)}",
                 "print(paste('Completed subject',i))",
                 "}",sep="\n")
               
