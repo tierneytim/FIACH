@@ -5,7 +5,7 @@
 ## R CMD check results
 There were no ERRORs or warnings in the test enviromnents. 
 
-There was one NOTE.
+There was one NOTE on Ubutu 12.04.
 
 * Checking CRAN incoming feasibility
 
