@@ -291,6 +291,7 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
   #####################################
   if(is.null(rp)==FALSE){
   rp<-read.table(rp)
+  if(nrow(rp)!=time){stop("The number of functional volumes does not equal the number of timepoints in the supplied rp file")}
   fd<-fd(rp)
   noise.basis6<-cbind(rp,noise.regs6)
   fdNoise<-cbind(fd,noise.regs6)
