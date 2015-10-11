@@ -3,7 +3,7 @@
 \title{
 Reslice Image}
 \description{
-This function creates a 2D matrix from a  4D/3D image array.}
+This function reslices 4D/3D image array.}
 \usage{
 reslice(data,newDim,currentDim=NULL)
 }
