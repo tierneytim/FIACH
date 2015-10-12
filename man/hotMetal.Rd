@@ -6,7 +6,7 @@ Hot Metal
 \description{
 This function creates a hot metal colour palette}
 \usage{
-hotMetal(X)
+hotMetal(n)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
