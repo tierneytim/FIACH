@@ -377,8 +377,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   }
   savePNG<-function(){
     Jwin<-tktoplevel()
-    width <- tclVar(as.character(tkwinfo("reqwidth",img1)))
-    height<-tclVar(as.character(tkwinfo("reqwidth",img1)))
+    width <- tclVar(tkwinfo("reqwidth",img1))
+    height<-tclVar(tkwinfo("reqheight",img1))
     res<-tclVar("300")
     WIDTH<-tkentry(Jwin,width="3",textvariable=width)
     HEIGHT<-tkentry(Jwin,width="3",textvariable=height)
@@ -394,8 +394,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     tkfocus(Jwin)
     save<-function(){
       w<-as.numeric(tclvalue(width))
-      h<-as.numeric(tclvalue(width))
-      png(filename = tkgetSaveFile())
+      h<-as.numeric(tclvalue(height))
+      r<-as.numeric(tclvalue(res))
+      png(filename = tkgetSaveFile(),width = w,height = h,res =r)
       plotf()
       dev.off()
       tkdestroy(Jwin)
