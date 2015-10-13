@@ -16,7 +16,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     stop("This is not an array with 3 or more dimensions")
   }
   orig<-data
-
+  
   ##############################
   ##### DESIRED HEIGHT #########
   ##############################
@@ -52,14 +52,14 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   data<-zeroNa(input = data)
   
   if(is.null(otherData)){
-  otherData<-array(0,dim = c(dim(data)[1:3],1))
+    otherData<-array(0,dim = c(dim(data)[1:3],1))
   }else{
-   dOther<-dim(otherData)
-   if(any(dOther[1:3]!=d[1:3])){stop("dimensions of data and otherData must match")}
-   if(length(dOther)==3){dim(otherData)<-c(dOther,1)
-   }
+    dOther<-dim(otherData)
+    if(any(dOther[1:3]!=d[1:3])){stop("dimensions of data and otherData must match")}
+    if(length(dOther)==3){dim(otherData)<-c(dOther,1)
+    }
   }
-
+  
   origOther<-otherData
   w1<-d1*pixdim[1]
   w2<-d2*pixdim[2]
@@ -94,18 +94,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   #########################
   ####### FRAMES ##########
   #########################
-  tclServiceMode(FALSE)
   base<-tktoplevel()
-  topMenu <- tkmenu(base)
-  tkconfigure(base, menu = topMenu)
-  fileMenu <- tkmenu(topMenu, tearoff = FALSE)
-  tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
-  saveAsMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
-  tkadd(fileMenu, "cascade", label = "Save as", menu = saveAsMenu)
-  overlayMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
-  tkadd(topMenu,"cascade", label = "Overlay",menu=overlayMenu)
-  checkRegMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
-  tkadd(topMenu,"cascade", label = "Check Reg",menu=checkRegMenu)
   tktitle(base)<-"Display"
   master<-tkframe(parent=base)
   f1<-tkframe(parent = master)
@@ -147,9 +136,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     image(1:d1,1:d2,z=im3,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
     if(crossHairsOn) abline(h = yl,v = xl,col="green")
     if(d4>1){
-    tseries<-data[x,y,z,]
-    plot(1:d4,tseries,type="l",axes=FALSE,col="grey",xlim=c(1,d4))
-    points(x = t,y = tseries[t],col="green")
+      tseries<-data[x,y,z,]
+      plot(1:d4,tseries,type="l",axes=FALSE,col="grey",xlim=c(1,d4))
+      points(x = t,y = tseries[t],col="green")
     }
     parPlotSize1 <<- par("plt")
     usrCoords1   <<- par("usr")
@@ -246,7 +235,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       if(length(t)<1){t<-1}
       if(t>d4){t<-d4}
       tclvalue(time)<<-t
-      }
+    }
     tkrreplot(img1)
     if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){tkrreplot(img2)}
   }
@@ -295,9 +284,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     tkrreplot(img1)
     if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){
       if(dim(otherData)[4]>1){
-      tkrreplot(img2)
-        }
+        tkrreplot(img2)
       }
+    }
   }
   maxminChange<-function(){
     if(suppressWarnings(is.na(as.numeric(tclvalue(high))))||tclvalue(high)==""){
@@ -335,23 +324,23 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   checkRegMNI<-function(){
     if(tclvalue(cReg)=="1"){return(0)}
     if(tclvalue(cRegMNI)=="1"){
-    otherData<<-readNii(system.file("extdata","mni.nii.gz",package = "FIACH"))
-    dim(otherData)<<-c(dim(otherData),1)
-    if(any(dim(data)[1:3]!=dim(otherData)[1:3])){return(0);}
-    r2<<-round(range(otherData),digits = 2)
-    low2<<-tclVar(as.character(r2[1]))
-    high2<<-tclVar(as.character(r2[2]))
-    if(asp>1){
-      img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
-    }else{
-      img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
-    }
-    tkgrid(f6,column=1,row=1)
-    tkgrid(img2,column=1,row=0)
-    tkbind(img2, "<Button-3>",crossHairs)
-    tkbind(img2, "<Button-1>",OnLeftClick1)
-    tkbind(img2, "<B1-Motion>",OnLeftClick1)
-    tkconfigure(img2,cursor="crosshair")
+      otherData<<-readNii(system.file("extdata","mni.nii.gz",package = "FIACH"))
+      dim(otherData)<<-c(dim(otherData),1)
+      if(any(dim(data)[1:3]!=dim(otherData)[1:3])){return(0);}
+      r2<<-round(range(otherData),digits = 2)
+      low2<<-tclVar(as.character(r2[1]))
+      high2<<-tclVar(as.character(r2[2]))
+      if(asp>1){
+        img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
+      }else{
+        img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
+      }
+      tkgrid(f6,column=1,row=1)
+      tkgrid(img2,column=1,row=0)
+      tkbind(img2, "<Button-3>",crossHairs)
+      tkbind(img2, "<Button-1>",OnLeftClick1)
+      tkbind(img2, "<B1-Motion>",OnLeftClick1)
+      tkconfigure(img2,cursor="crosshair")
     }else{
       tkgrid.forget(img2)
       tkgrid.forget(f1)
@@ -432,12 +421,12 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   scaleFactor<-(desHeight)/(testHeight)
   asp<-(w1+w2)/(w2+w3)
   if(asp>1){
-  img1<-tkrplot(parent = f1,fun = plotf,hscale=scaleFactor,vscale=scaleFactor/asp)
-  img2<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
+    img1<-tkrplot(parent = f1,fun = plotf,hscale=scaleFactor,vscale=scaleFactor/asp)
+    img2<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
   }else{
     img1<-tkrplot(parent = f1,fun = plotf,hscale=scaleFactor*asp,vscale=scaleFactor)
     img2<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
-    }
+  }
   
   
   f5<-tkframe(parent=master,
@@ -473,9 +462,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   minLab<-tklabel(parent = f5,text="Min")
   intensLab<-tklabel(parent=f5,text="Intensity")
   tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie")
-  tkadd(saveAsMenu, "command", label = ".png",command=savePNG)
-  tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
-  tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)
   ##########################
   ###### GEOMETRY ##########
   ##########################
@@ -508,11 +494,23 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###########################
   ##### BINDINGS ############
   ###########################
-
   tkconfigure(img1,cursor="crosshair")
-
-  tclServiceMode(TRUE)
   tkwm.resizable(base,FALSE,FALSE)
-  tkfocus(base)
+  ###########################
+  ####### MENUS #############
+  ###########################
+  topMenu <- tkmenu(base,tearoff=FALSE)
+  tkconfigure(base, menu = topMenu)
+  fileMenu <- tkmenu(topMenu, tearoff = FALSE)
+  tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
+  saveAsMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
+  tkadd(fileMenu, "cascade", label = "Save as", menu = saveAsMenu)
+  overlayMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
+  tkadd(topMenu,"cascade", label = "Overlay",menu=overlayMenu)
+  checkRegMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
+  tkadd(topMenu,"cascade", label = "Check Reg",menu=checkRegMenu)
+  tkadd(saveAsMenu, "command", label = ".png",command=savePNG)
+  tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
+  tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)
   if(ret){return(orig)}
 }
