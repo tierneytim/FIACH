@@ -41,7 +41,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     dim(data)<-c(dim(data),1)
     d4<-1
   }
-  
   xCoords<-1:d1
   yCoords<-1:d2
   zCoords<-1:d3
@@ -50,7 +49,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   if(is.null(at)){pixdim<-c(1,1,1)}else{pixdim<-at}
   if(length(pixdim)==8){pixdim<-pixdim[2:4]}
   data<-zeroNa(input = data)
-  
   if(is.null(otherData)){
     otherData<-array(0,dim = c(dim(data)[1:3],1))
   }else{
@@ -59,7 +57,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     if(length(dOther)==3){dim(otherData)<-c(dOther,1)
     }
   }
-  
   origOther<-otherData
   w1<-d1*pixdim[1]
   w2<-d2*pixdim[2]
@@ -322,11 +319,11 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     }else{someFlag<<-FALSE}
   }
   checkRegMNI<-function(){
-    if(tclvalue(cReg)=="1"){return(0)}
+    if(tclvalue(cReg)=="1"){tclvalue(cRegMNI)<<-"0";return(0)}
     if(tclvalue(cRegMNI)=="1"){
       otherData<<-readNii(system.file("extdata","mni.nii.gz",package = "FIACH"))
       dim(otherData)<<-c(dim(otherData),1)
-      if(any(dim(data)[1:3]!=dim(otherData)[1:3])){return(0);}
+      if(any(dim(data)[1:3]!=dim(otherData)[1:3])){tclvalue(cRegMNI)<<-"0";return(0)}
       r2<<-round(range(otherData),digits = 2)
       low2<<-tclVar(as.character(r2[1]))
       high2<<-tclVar(as.character(r2[2]))
@@ -350,10 +347,10 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     }
   }
   checkReg<-function(){
-    if(tclvalue(cRegMNI)=="1"){return(0)}
-    if(tclvalue(cReg)=="1" & sum(origOther)>0){
+    if(tclvalue(cRegMNI)=="1"|sum(origOther)==0){tclvalue(cReg)<<-"0";return(0)}
+    if(tclvalue(cReg)=="1"){
       dim(otherData)<<-c(dim(otherData),1)
-      if(any(dim(data)[1:3]!=dim(otherData)[1:3])){return(0);}
+      if(any(dim(data)[1:3]!=dim(otherData)[1:3])){tclvalue(cReg)<<-"0";return(0)}
       otherData<<-origOther
       r2<<-round(range(otherData),digits = 2)
       low2<<-tclVar(as.character(r2[1]))
@@ -383,20 +380,14 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     width <- tclVar(as.character(tkwinfo("reqwidth",img1)))
     height<-tclVar(as.character(tkwinfo("reqwidth",img1)))
     res<-tclVar("300")
-    
     WIDTH<-tkentry(Jwin,width="3",textvariable=width)
     HEIGHT<-tkentry(Jwin,width="3",textvariable=height)
-    QUALITY<-tkentry(Jwin,width="3",textvariable=quality)
     RES<-tkentry(Jwin,width="3",textvariable=res)
-    
     Wlab<-tklabel(Jwin,text="Width")
     Hlab<-tklabel(Jwin,text="Height")
     Rlab<-tklabel(Jwin,text="DPI")
-    
     Wlab2<-tklabel(Jwin,text="px")
     Hlab2<-tklabel(Jwin,text="px")
-    
-    
     tkgrid(Hlab,HEIGHT,Hlab2)
     tkgrid(Wlab,WIDTH,Wlab2)
     tkgrid(Rlab,RES)
@@ -427,8 +418,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     img1<-tkrplot(parent = f1,fun = plotf,hscale=scaleFactor*asp,vscale=scaleFactor)
     img2<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
   }
-  
-  
   f5<-tkframe(parent=master,
               width=as.numeric(tkwinfo("reqwidth",img1)),
               height=100,
@@ -439,11 +428,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
               height=100,
               borderwidth=0,
               relief="groove")
-  
   tkgrid(master,columnspan=2,rowspan=2)
   tkgrid(f1,columnspan=2,rowspan=1)
   tkgrid(img1,column=0,row=0)
-  
   ##########################
   ##### Widgets ############
   ##########################
