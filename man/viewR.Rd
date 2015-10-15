@@ -8,12 +8,15 @@ This function allows for interactive viewing of 3D and 4D medical Images.
 }
 
 \usage{
-viewR(data=NULL,xyz=NULL,ret=FALSE)
+viewR(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{data}{
 A 3D/4D array. If the array has an attribute named pixdim viewR will try and adjust the aspect appropriately. If NULL an interactive file selector will open to select the images one would like to view. If file paths to 3D/4D images are supplied they will be read and displayed. Multiple 3D files will be concatenated if the dimensions match. viewR can then be ran in movie mode. Currently this viewR does not display world coordinates. Instead voxel coordinates are used. As such it does not enforce information obtained from nifti headers.
+}
+\item{otherData}{
+other
 }
 \item{xyz}{
 numeric vector indicating initial voxel coordinates.
