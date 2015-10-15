@@ -8,8 +8,8 @@ Maintainer: Tim Tierney <fiachmri@gmail.com>
 Repository: CRAN
 Description: Useful functions for fMRI preprocessing.
 License: GPL-2
-Depends: R (>= 3.2.0)
-Imports: Rcpp (>= 0.11.4), RNiftyReg (>= 2.0.0),tcltk, tkrplot, utils,
+Depends: R (>= 3.2.0),tcltk, tkrplot
+Imports: Rcpp (>= 0.11.4), RNiftyReg (>= 2.0.0), utils,
         stats, graphics, grDevices
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
