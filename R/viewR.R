@@ -233,8 +233,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       if(t>d4){t<-d4}
       tclvalue(time)<<-t
     }
-    tkrreplot(img1)
-    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){tkrreplot(img2)}
+    tkrplot::tkrreplot(img1)
+    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){tkrplot::tkrreplot(img2)}
   }
   changeTemp<-function(){
     if(is.na(strtoi(tclvalue(time)))){
@@ -243,8 +243,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     t<-strtoi(tclvalue(time))
     if(t>d4){tclvalue(time)<<-as.character(d4)}
     if(t<1){tclvalue(time)<<-as.character(1)}
-    tkrreplot(img1)
-    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1" & dim(otherData)[4]==d4){tkrreplot(img2)}
+    tkrplot::tkrreplot(img1)
+    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1" & dim(otherData)[4]==d4){tkrplot::tkrreplot(img2)}
   }
   tkspinbox <- function(parent, ...) {tkwidget(parent, "tk::spinbox", ...)}
   onSpin<-function(){
@@ -278,10 +278,10 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     if(x>d1){tclvalue(xl)<<-d1}
     if(y>d2){tclvalue(yl)<<-d2}
     if(z>d3){tclvalue(zl)<<-d3}
-    tkrreplot(img1)
+    tkrplot::tkrreplot(img1)
     if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){
       if(dim(otherData)[4]>1){
-        tkrreplot(img2)
+        tkrplot::tkrreplot(img2)
       }
     }
   }
@@ -295,12 +295,12 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     max<-as.numeric(tclvalue(high))
     min<-as.numeric(tclvalue(low))
     if(max<min){tclvalue(high)<<-r[2];tclvalue(low)<<-r[1]}
-    tkrreplot(img1)
+    tkrplot::tkrreplot(img1)
   }
   crossHairs<-function(){
     crossHairsOn<<-!crossHairsOn
-    tkrreplot(img1)
-    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){tkrreplot(img2)}
+    tkrplot::tkrreplot(img1)
+    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){tkrplot::tkrreplot(img2)}
   }
   repeat_call<-function(ms = 200 , f) {
     after_ID <<- tcl( "after" , ms,function(){ 
@@ -328,9 +328,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       low2<<-tclVar(as.character(r2[1]))
       high2<<-tclVar(as.character(r2[2]))
       if(asp>1){
-        img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
+        img2<<-tkrplot::tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
       }else{
-        img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
+        img2<<-tkrplot::tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
       }
       tkgrid(f6,column=1,row=1)
       tkgrid(img2,column=1,row=0)
@@ -356,9 +356,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       low2<<-tclVar(as.character(r2[1]))
       high2<<-tclVar(as.character(r2[2]))
       if(asp>1){
-        img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
+        img2<<-tkrplot::tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
       }else{
-        img2<<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
+        img2<<-tkrplot::tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
       }
       tkgrid(f6,column=1,row=1)
       tkgrid(img2,column=1,row=0)
@@ -407,17 +407,17 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ##########################
   ###### THE PLOTS #########
   ##########################
-  testImg<-tkrplot(parent = f1,fun =plotf)
+  testImg<-tkrplot::tkrplot(parent = f1,fun =plotf)
   testHeight<-as.numeric(tkwinfo("reqheight",testImg))
   testWidth<-as.numeric(tkwinfo("reqwidth",testImg))
   scaleFactor<-(desHeight)/(testHeight)
   asp<-(w1+w2)/(w2+w3)
   if(asp>1){
-    img1<-tkrplot(parent = f1,fun = plotf,hscale=scaleFactor,vscale=scaleFactor/asp)
-    img2<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
+    img1<-tkrplot::tkrplot(parent = f1,fun = plotf,hscale=scaleFactor,vscale=scaleFactor/asp)
+    img2<-tkrplot::tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor,vscale=scaleFactor/asp)
   }else{
-    img1<-tkrplot(parent = f1,fun = plotf,hscale=scaleFactor*asp,vscale=scaleFactor)
-    img2<-tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
+    img1<-tkrplot::tkrplot(parent = f1,fun = plotf,hscale=scaleFactor*asp,vscale=scaleFactor)
+    img2<-tkrplot::tkrplot(parent = f1,fun = plotf2,hscale=scaleFactor*asp,vscale=scaleFactor)
   }
   f5<-tkframe(parent=master,
               width=as.numeric(tkwinfo("reqwidth",img1)),
