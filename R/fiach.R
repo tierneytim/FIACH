@@ -3,7 +3,7 @@
   less<-x<=thresh
   great<-x>=thresh
   n<-length(x)
-  prop<-c(sum(less)/n,sum(great)/n)
+  prop<-c(quant,1-quant)
   mu<-c(mean(x[less]),mean(x[great]))
   sigma<-c(sd(x[less]),sd(x[great]))
   return(list(prop,mu,sigma))
