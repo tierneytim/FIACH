@@ -1,4 +1,4 @@
-selectR<-function(update=TRUE){
+selectR<-function(update=FALSE){
   tt<-tktoplevel()
  
   tktitle(tt)<-"File Selector"
