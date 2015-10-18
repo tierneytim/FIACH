@@ -1,5 +1,10 @@
 viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###############################
+  ###### TKRPLOT CHECK ##########
+  ###############################
+  tkrPossible<-requireNamespace("tkrplot",quietly = TRUE)
+  if(!tkrPossible){stop("tkrplot is not available or could not be loaded. Please install to use viewR")}
+  ###############################
   ###### DATA CHECK #############
   ###############################
   if(is.null(data)){
@@ -16,7 +21,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     stop("This is not an array with 3 or more dimensions")
   }
   orig<-data
-  
   ##############################
   ##### DESIRED HEIGHT #########
   ##############################
