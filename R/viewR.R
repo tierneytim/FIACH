@@ -439,6 +439,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   coX<-tkspinbox(f5,textvariable=X,from=1,to=d1,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
   coY<-tkspinbox(f5,textvariable=Y,from=1,to=d2,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
   coZ<-tkspinbox(f5,textvariable=Z,from=1,to=d3,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
+  coXw<-tkspinbox(f5,textvariable=X,from=1,to=d1,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
+  coYw<-tkspinbox(f5,textvariable=Y,from=1,to=d2,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
+  coZw<-tkspinbox(f5,textvariable=Z,from=1,to=d3,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
   MAX<-tkentry(f5,textvariable=high,width=7)
   MIN<-tkentry(f5,textvariable=low,width=7)
   intensity<-tkentry(f5,textvariable=intens,state="readonly",readonlybackground="white",width=7)
@@ -462,6 +465,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkplace(coY,'in'=coYLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
   tkplace(coZ,'in'=coZLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
   tkplace(spin,'in'=coTLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
+  tkplace(coXw,'in'=coX,x=as.numeric(tkwinfo("reqwidth",coX))*1.1,rely=.5,anchor="w",height=80/5)
+  tkplace(coYw,'in'=coY,x=as.numeric(tkwinfo("reqwidth",coY))*1.1,rely=.5,anchor="w",height=80/5)
+  tkplace(coZw,'in'=coZ,x=as.numeric(tkwinfo("reqwidth",coZ))*1.1,rely=.5,anchor="w",height=80/5)
   if(d4>1){tkplace(tmovieBut,"in"=spin,rely=.5,anchor="w",x=as.numeric(tkwinfo("reqwidth",spin)),height=80/4)}
   wiBox<-as.numeric(tkwinfo("reqwidth",intensity))+10
   tkplace(intensity,relx=1,x=-wiBox,rely=0/4,y=10)
