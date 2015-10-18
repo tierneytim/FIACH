@@ -77,6 +77,11 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   X<-tclVar(tclvalue(xl))
   Y<-tclVar(tclvalue(yl))
   Z<-tclVar(tclvalue(zl))
+  wRange<-voxelToWorld(matrix(c(1,1,1,d1,d2,d3),byrow = TRUE,ncol=3),orig)
+  worldInit<-RNiftyReg::voxelToWorld(c(xx,yy,zz),orig)
+  Xw<-tclVar(worldInit[1])
+  Yw<-tclVar(worldInit[2])
+  Zw<-tclVar(worldInit[3])
   parPlotSize1<-c()
   usrCoords1<-c()
   low<-tclVar(as.character(r[1]))
@@ -143,6 +148,13 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     }
     parPlotSize1 <<- par("plt")
     usrCoords1   <<- par("usr")
+    
+    wc<-voxelToWorld(points = c(x,y,z),image = orig)
+    if(exists("coXw")){
+    tkset(widget = coXw,as.character(wc[1]))
+    tkset(widget = coYw,as.character(wc[2]))
+    tkset(widget = coZw,as.character(wc[3]))
+    }
   }
   plotf2<-function(){
     par(oma = rep(0, 4), mar = rep(0, 4), bg = "black")
@@ -443,9 +455,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   coX<-tkspinbox(f5,textvariable=X,from=1,to=d1,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
   coY<-tkspinbox(f5,textvariable=Y,from=1,to=d2,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
   coZ<-tkspinbox(f5,textvariable=Z,from=1,to=d3,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
-  coXw<-tkspinbox(f5,textvariable=X,from=1,to=d1,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
-  coYw<-tkspinbox(f5,textvariable=Y,from=1,to=d2,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
-  coZw<-tkspinbox(f5,textvariable=Z,from=1,to=d3,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
+  coXw<-tkspinbox(f5,textvariable=Xw,values=wRange[1,1]:wRange[2,1],repeatdelay=10,width=5)
+  coYw<-tkspinbox(f5,textvariable=Yw,values=wRange[1,2]:wRange[2,2],repeatdelay=10,width=5)
+  coZw<-tkspinbox(f5,textvariable=Zw,values=wRange[1,3]:wRange[2,3],repeatdelay=10,width=5)
   MAX<-tkentry(f5,textvariable=high,width=7)
   MIN<-tkentry(f5,textvariable=low,width=7)
   intensity<-tkentry(f5,textvariable=intens,state="readonly",readonlybackground="white",width=7)
@@ -494,6 +506,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###########################
   tkconfigure(img1,cursor="crosshair")
   tkwm.resizable(base,FALSE,FALSE)
+  tkset(widget = coXw,as.character(worldInit[1]))
+  tkset(widget = coYw,as.character(worldInit[2]))
+  tkset(widget = coZw,as.character(worldInit[3]))
   ###########################
   ####### MENUS #############
   ###########################
