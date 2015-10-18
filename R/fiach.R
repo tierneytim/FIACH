@@ -17,7 +17,7 @@
   return(uniCheck|tooSmall)}
 .noiseSeg<-function(rtsnr,step=.05){
   print("Running Expectation Maximisation on Robust TSNR for noise mask creation")
-  resamp<-quantile(rtsnr,seq(0,.98,length.out = 1000))
+  resamp<-quantile(rtsnr[is.finite(rtsnr)],seq(0,.98,length.out = 1000))
   
   props<-seq(.01,.95,step)
   vals<-list()
