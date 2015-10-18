@@ -8,7 +8,7 @@ This function allows for interactive file selection using regular expressions.
 }
 
 \usage{
-selectR(update=TRUE)
+selectR(update=FALSE)
 }
 \arguments{
 \item{update}{logical indicating whether or not the working directory should be changed to the current selected directory. This means that if this function is called a second time it will initiate in the directory it was in when previously called.
