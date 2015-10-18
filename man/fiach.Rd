@@ -53,7 +53,7 @@ file<-system.file("extdata","motion_ex.nii.gz",package="FIACH")
 arr<-readNii(file)
 RNiftyReg::writeNifti(arr,"fiach_example/motion_ex.nii.gz",datatype = "short")
 data(rp)
-write.table(rp[1:13,],"fiach_example/rp.txt",col.names=FALSE,row.names=FALSE)
+write.table(rp[1:7,],"fiach_example/rp.txt",col.names=FALSE,row.names=FALSE)
 
 # running FIACH #
 t<-boldContrast(1.5,30)
