@@ -77,7 +77,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   X<-tclVar(tclvalue(xl))
   Y<-tclVar(tclvalue(yl))
   Z<-tclVar(tclvalue(zl))
-  wRange<-voxelToWorld(matrix(c(1,1,1,d1,d2,d3),byrow = TRUE,ncol=3),orig)
+  wRange<-RNiftyReg::voxelToWorld(matrix(c(1,1,1,d1,d2,d3),byrow = TRUE,ncol=3),orig)
   worldInit<-RNiftyReg::voxelToWorld(c(xx,yy,zz),orig)
   Xw<-tclVar(worldInit[1])
   Yw<-tclVar(worldInit[2])
@@ -149,7 +149,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     parPlotSize1 <<- par("plt")
     usrCoords1   <<- par("usr")
     
-    wc<-voxelToWorld(points = c(x,y,z),image = orig)
+    wc<-RNiftyReg::voxelToWorld(points = c(x,y,z),image = orig)
     if(exists("coXw")){
     tkset(widget = coXw,as.character(wc[1]))
     tkset(widget = coYw,as.character(wc[2]))
