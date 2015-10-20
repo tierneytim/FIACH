@@ -236,7 +236,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       tclvalue(yl)<<-yl
       tclvalue(Y)<<-round(yl)
     }
-    if(yClick>yBorder&&xClick>xBorder &&d4>1){
+    if(yClick>yBorder&&xClick>xBorder &&d4>1 &&xClick<width && yClick<=height){
       first<-1.04-.04*d4
       last<- -.04+1.04*d4
       s<-round(first):round(last)
