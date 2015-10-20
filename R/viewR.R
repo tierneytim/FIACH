@@ -245,7 +245,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       click<-xClick-xBorder
       tind<-round(click/rangePix*length(s))
       t<-s[tind]
-      if(length(t)<1){t<-1}
+      if(length(t)<1||t<1){t<-1}
       if(t>d4){t<-d4}
       tclvalue(time)<<-t
     }
