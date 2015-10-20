@@ -468,22 +468,26 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   maxLab<-tklabel(parent = f5,text="Max")
   minLab<-tklabel(parent = f5,text="Min")
   intensLab<-tklabel(parent=f5,text="Intensity")
+  voxLab<-tklabel(parent=f5,text="Voxel")
+  worldLab<-tklabel(parent=f5,text="World")
   tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie")
   ##########################
   ###### GEOMETRY ##########
   ##########################
-  tkgrid(f5)
-  tkplace(coXLab,relx=0,rely=1/5,y=-20)
-  tkplace(coYLab,relx=0,rely=2/5,y=-20)
-  tkplace(coZLab,relx=0,rely=3/5,y=-20)
-  tkplace(coTLab,relx=0,rely=4/5,y=-20)
-  tkplace(coX,'in'=coXLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
-  tkplace(coY,'in'=coYLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
-  tkplace(coZ,'in'=coZLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
-  tkplace(spin,'in'=coTLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=80/5)
-  tkplace(coXw,'in'=coX,x=as.numeric(tkwinfo("reqwidth",coX))*1.1,rely=.5,anchor="w",height=80/5)
-  tkplace(coYw,'in'=coY,x=as.numeric(tkwinfo("reqwidth",coY))*1.1,rely=.5,anchor="w",height=80/5)
-  tkplace(coZw,'in'=coZ,x=as.numeric(tkwinfo("reqwidth",coZ))*1.1,rely=.5,anchor="w",height=80/5)
+  tkgrid(f5,column=0,row=1)
+  tkplace(coXLab,relx=0,rely=1/5)
+  tkplace(coYLab,relx=0,rely=2/5)
+  tkplace(coZLab,relx=0,rely=3/5)
+  tkplace(coTLab,relx=0,rely=4/5)
+  tkplace(coX,'in'=coXLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
+  tkplace(coY,'in'=coYLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
+  tkplace(coZ,'in'=coZLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
+  tkplace(spin,'in'=coTLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
+  tkplace(coXw,'in'=coX,x=as.numeric(tkwinfo("reqwidth",coX))*1.1,rely=.5,anchor="w",height=100/5)
+  tkplace(coYw,'in'=coY,x=as.numeric(tkwinfo("reqwidth",coY))*1.1,rely=.5,anchor="w",height=100/5)
+  tkplace(coZw,'in'=coZ,x=as.numeric(tkwinfo("reqwidth",coZ))*1.1,rely=.5,anchor="w",height=100/5)
+  tkplace(voxLab,"in"=coX,x=0,y=-as.numeric(tkwinfo("reqheight",coX))*.75,anchor="w")
+  tkplace(worldLab,"in"=coXw,x=0,y=-as.numeric(tkwinfo("reqheight",coXw))*.75,anchor="w")
   if(d4>1){tkplace(tmovieBut,"in"=spin,rely=.5,anchor="w",x=as.numeric(tkwinfo("reqwidth",spin)),height=80/4)}
   wiBox<-as.numeric(tkwinfo("reqwidth",intensity))+10
   tkplace(intensity,relx=1,x=-wiBox,rely=0/4,y=10)
@@ -513,7 +517,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ####### MENUS #############
   ###########################
   topMenu <- tkmenu(base,tearoff=FALSE)
-  tkconfigure(base, menu = topMenu)
   fileMenu <- tkmenu(topMenu, tearoff = FALSE)
   tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
   saveAsMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
@@ -525,5 +528,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkadd(saveAsMenu, "command", label = ".png",command=savePNG)
   tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
   tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)
+  tkconfigure(base, menu = topMenu)
   if(ret){return(orig)}
 }
