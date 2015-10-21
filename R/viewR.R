@@ -53,7 +53,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   if(is.null(at)){pixdim<-c(1,1,1)}else{pixdim<-at}
   if(length(pixdim)==8){pixdim<-pixdim[2:4]}
   data<-zeroNa(input = data)
-  if(is.null(otherData)){
+  null2<-is.null(otherData)
+  if(null2){
     otherData<-array(0,dim = c(dim(data)[1:3],1))
   }else{
     dOther<-dim(otherData)
@@ -573,7 +574,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkadd(topMenu,"cascade", label = "Check Reg",menu=checkRegMenu)
   tkadd(saveAsMenu, "command", label = ".png",command=savePNG)
   tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
-  tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)
+  if(!null2){tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)}
   tkconfigure(base, menu = topMenu)
   if(ret){return(orig)}
 }
