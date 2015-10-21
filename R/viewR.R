@@ -149,7 +149,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     parPlotSize1 <<- par("plt")
     usrCoords1   <<- par("usr")
     
-    wc<-RNiftyReg::voxelToWorld(points = c(x,y,z),image = orig)
+    wc<-round(RNiftyReg::voxelToWorld(points = c(xl,yl,zl),image = orig))
     if(exists("coXw")){
     tkset(widget = coXw,as.character(wc[1]))
     tkset(widget = coYw,as.character(wc[2]))
@@ -285,15 +285,58 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       tclvalue(time)<<-as.character(1)}else{
         tclvalue(time)<<-tclvalue(time)
       }
-    x<-round(as.numeric(tclvalue(xl)))
-    y<-round(as.numeric(tclvalue(yl)))
-    z<-round(as.numeric(tclvalue(zl)))
+    xl<-as.numeric(tclvalue(xl))
+    yl<-as.numeric(tclvalue(yl))
+    zl<-as.numeric(tclvalue(zl))
+    x<-round(xl)
+    y<-round(yl)
+    z<-round(zl)
     if(x<1){tclvalue(xl)<<-1}
     if(y<1){tclvalue(yl)<<-1}
     if(z<1){tclvalue(zl)<<-1}
     if(x>d1){tclvalue(xl)<<-d1}
     if(y>d2){tclvalue(yl)<<-d2}
     if(z>d3){tclvalue(zl)<<-d3}
+    tkrplot::tkrreplot(img1)
+    if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){
+      if(dim(otherData)[4]>1){
+        tkrplot::tkrreplot(img2)
+      }
+    }
+  }
+  onSpinW<-function(){
+    xw<-strtoi(tclvalue(Xw))
+    yw<-strtoi(tclvalue(Yw))
+    zw<-strtoi(tclvalue(Zw))
+    voxCo<-RNiftyReg::worldToVoxel(points = c(xw,yw,zw),image = orig)
+    
+  if(is.na(voxCo[1])){
+      tclvalue(xl)<<-as.character(xx)
+      tclvalue(X)<<-as.character(xx)
+    }else{
+      xl<-voxCo[1]
+      x<-round(xl)
+      if(x<1||x>d1){tclvalue(xl)<<-1}else{tclvalue(xl)<<-xl}
+    }
+    
+    if(is.na(voxCo[2])){
+      tclvalue(yl)<<-as.character(yy)
+      tclvalue(Y)<<-as.character(yy)
+    }else{
+      yl<-voxCo[2]
+      y<-round(yl)
+      if(y<1||y>d2){tclvalue(yl)<<-1}else{tclvalue(yl)<<-yl}
+    }
+    
+    if(is.na(voxCo[3])){
+      tclvalue(zl)<<-as.character(zz)
+      tclvalue(Z)<<-as.character(zz)
+    }else{
+      zl<-voxCo[3]
+      z<-round(zl)
+      if(z<1||z>d3){tclvalue(zl)<<-1}else{tclvalue(zl)<<-zl}
+    }
+    
     tkrplot::tkrreplot(img1)
     if(tclvalue(cReg)=="1"|tclvalue(cRegMNI)=="1"){
       if(dim(otherData)[4]>1){
@@ -452,12 +495,12 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ##### Widgets ############
   ##########################
   spin<-tkspinbox(f5,textvariable=time,from=1,to=d4,command=changeTemp,increment=1,repeatdelay=200,width=5,wrap=TRUE)
-  coX<-tkspinbox(f5,textvariable=X,from=1,to=d1,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
-  coY<-tkspinbox(f5,textvariable=Y,from=1,to=d2,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
-  coZ<-tkspinbox(f5,textvariable=Z,from=1,to=d3,command=function()onSpin(),increment=1,repeatdelay=10,width=5)
-  coXw<-tkspinbox(f5,textvariable=Xw,values=wRange[1,1]:wRange[2,1],repeatdelay=10,width=5)
-  coYw<-tkspinbox(f5,textvariable=Yw,values=wRange[1,2]:wRange[2,2],repeatdelay=10,width=5)
-  coZw<-tkspinbox(f5,textvariable=Zw,values=wRange[1,3]:wRange[2,3],repeatdelay=10,width=5)
+  coX<-tkspinbox(f5,textvariable=X,from=1,to=d1,command=onSpin,increment=1,repeatdelay=10,width=5)
+  coY<-tkspinbox(f5,textvariable=Y,from=1,to=d2,command=onSpin,increment=1,repeatdelay=10,width=5)
+  coZ<-tkspinbox(f5,textvariable=Z,from=1,to=d3,command=onSpin,increment=1,repeatdelay=10,width=5)
+  coXw<-tkspinbox(f5,textvariable=Xw,values=wRange[1,1]:wRange[2,1],repeatdelay=10,width=5,command=onSpinW)
+  coYw<-tkspinbox(f5,textvariable=Yw,values=wRange[1,2]:wRange[2,2],repeatdelay=10,width=5,command=onSpinW)
+  coZw<-tkspinbox(f5,textvariable=Zw,values=wRange[1,3]:wRange[2,3],repeatdelay=10,width=5,command=onSpinW)
   MAX<-tkentry(f5,textvariable=high,width=7)
   MIN<-tkentry(f5,textvariable=low,width=7)
   intensity<-tkentry(f5,textvariable=intens,state="readonly",readonlybackground="white",width=7)
@@ -501,6 +544,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkbind(coX, "<Return>",function()onSpin())
   tkbind(coY, "<Return>",function()onSpin())
   tkbind(coZ, "<Return>",function()onSpin())
+  tkbind(coXw, "<Return>",function()onSpinW())
+  tkbind(coYw, "<Return>",function()onSpinW())
+  tkbind(coZw, "<Return>",function()onSpinW())
   tkbind(spin, "<Return>",function()changeTemp())
   tkbind(img1, "<Button-3>",crossHairs)
   tkbind(img1, "<Button-1>",OnLeftClick1)
