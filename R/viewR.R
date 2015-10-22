@@ -1,4 +1,4 @@
-viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
+viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###############################
   ###### TKRPLOT CHECK ##########
   ###############################
@@ -21,6 +21,23 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     stop("This is not an array with 3 or more dimensions")
   }
   orig<-data
+  #################################
+  ######## OVERLAY CHECK ##########
+  #################################
+  if(is.character(overlay)){
+    file<-overlay
+    if(length(file)==0){stop("You must select a file")}
+    overlay<-readNii(file)
+  }
+  if(!is.null(overlay)){
+    if(length(dim(overlay))==3){dim(overlay)<-c(dim(overlay),1)}
+  if(!is.array(overlay)){
+    stop("This is not an array with 3 or more dimensions")
+  }
+  if(length(dim(overlay))==4){if(dim(overlay)[4]>1){stop("Overlay must have 3 and only three dimensions")}}
+    if(any(dim(overlay)[1:3]!=dim(data)[1:3])){stop("Overlay must have same dimensions as data")}
+  }
+  olay<-!is.null(overlay)
   ##############################
   ##### DESIRED HEIGHT #########
   ##############################
@@ -90,6 +107,11 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   low2<-tclVar(as.character(r2[1]))
   high2<-tclVar(as.character(r2[2]))
   intens<-tclVar(as.character(round(data[xx,yy,zz,1],digits = 2)))
+  if(olay){ro<-round(range(overlay),digits = 2)
+  lowo<-tclVar(as.character(ro[1]))
+  higho<-tclVar(as.character(ro[2]))
+  intenso<-tclVar(as.character(round(overlay[xx,yy,zz,1],digits = 2)))
+  }
   crossHairsOn<-TRUE
   tmovie<-tclVar(FALSE)
   after_ID <-""
@@ -98,6 +120,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   cReg<-tclVar("0")
   cRegFileN<-tclVar("0")
   cRegFileO<-tclVar("0")
+  ovLay<-tclVar("0")
   #########################
   ####### FRAMES ##########
   #########################
@@ -124,23 +147,35 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     t<-as.numeric(tclvalue(time))
     if(is.na(t)){t<-1}
     tclvalue(time)<<-t
+    
     lim<-c(as.numeric(tclvalue(low)),as.numeric(tclvalue(high)))
     if(any(is.na(lim))){lim<-r;tclvalue(low)<<-r[1];tclvalue(high)<<-r[2]}
     tclvalue(intens)<<-round(data[x,y,z,t],digits = 2)
+    if(tclvalue(ovLay)=="1" && olay){
+    olim<-c(as.numeric(tclvalue(lowo)),as.numeric(tclvalue(higho)))
+    if(any(is.na(olim))){olim<-ro;tclvalue(lowo)<<-ro[1];tclvalue(higho)<<-ro[2]}
+    tclvalue(intenso)<<-round(overlay[x,y,z,1],digits = 2)
+    o1<-overlay[,y,,1]
+    o2<-overlay[x,,,1]
+    o3<-overlay[,,z,1]
+    }
     im1<-data[,y,,t]
     im1[im1<lim[1]]<-lim[1]
     im1[im1>lim[2]]<-lim[2]
     image(1:d1,1:d3,z=im1,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
+    if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d3,z=o1,useRaster=TRUE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = zl,v = xl,col="green")
     im2<-data[x,,,t]
     im2[im2<lim[1]]<-lim[1]
     im2[im2>lim[2]]<-lim[2]
     image(1:d2,1:d3,z=im2,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
+    if(tclvalue(ovLay)=="1" && olay){image(1:d2,1:d3,z=o2,useRaster=TRUE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = zl,v = yl,col="green")
     im3<-data[,,z,t]
     im3[im3<lim[1]]<-lim[1]
     im3[im3>lim[2]]<-lim[2]
     image(1:d1,1:d2,z=im3,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
+    if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d2,z=o3,useRaster=TRUE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = yl,v = xl,col="green")
     if(d4>1){
       tseries<-data[x,y,z,]
@@ -354,6 +389,20 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     if(max<min){tclvalue(high)<<-r[2];tclvalue(low)<<-r[1]}
     tkrplot::tkrreplot(img1)
   }
+  if(olay){
+  maxminChangeO<-function(){
+    if(suppressWarnings(is.na(as.numeric(tclvalue(higho))))||tclvalue(higho)==""){
+      tclvalue(higho)<<-ro[2]
+    }
+    if(suppressWarnings(is.na(as.numeric(tclvalue(lowo))))||tclvalue(lowo)==""){
+      tclvalue(lowo)<<-ro[1]
+    }
+    max<-as.numeric(tclvalue(higho))
+    min<-as.numeric(tclvalue(lowo))
+    if(max<min){tclvalue(higho)<<-ro[2];tclvalue(lowo)<<-ro[1]}
+    tkrplot::tkrreplot(img1)
+  }
+  }
   crossHairs<-function(){
     crossHairsOn<<-!crossHairsOn
     tkrplot::tkrreplot(img1)
@@ -461,6 +510,9 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     savBut <-tkbutton(Jwin,text="  SAVE   ",command=save)
     tkgrid(savBut)
   }
+  overLay<-function(){
+    tkrplot::tkrreplot(img1)
+  }
   ##########################
   ###### THE PLOTS #########
   ##########################
@@ -501,6 +553,11 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   coZw<-tkspinbox(f5,textvariable=Zw,values=wRange[1,3]:wRange[2,3],repeatdelay=10,width=5,command=onSpinW)
   MAX<-tkentry(f5,textvariable=high,width=7)
   MIN<-tkentry(f5,textvariable=low,width=7)
+  if(olay){
+    intensityo<-tkentry(f5,textvariable=intenso,state="readonly",readonlybackground="white",width=7)
+    MAXo<-tkentry(f5,textvariable=higho,width=7)
+    MINo<-tkentry(f5,textvariable=lowo,width=7)
+  }
   intensity<-tkentry(f5,textvariable=intens,state="readonly",readonlybackground="white",width=7)
   coXLab<-tklabel(parent = f5,text="X")
   coYLab<-tklabel(parent = f5,text="Y")
@@ -511,6 +568,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   intensLab<-tklabel(parent=f5,text="Intensity")
   voxLab<-tklabel(parent=f5,text="Voxel")
   worldLab<-tklabel(parent=f5,text="World")
+  baseLab<-tklabel(parent=f5,text="Base")
+  oLab<-tklabel(parent=f5,text="Overlay")
   tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie")
   ##########################
   ###### GEOMETRY ##########
@@ -531,12 +590,24 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkplace(worldLab,"in"=coXw,x=0,y=-as.numeric(tkwinfo("reqheight",coXw))*.75,anchor="w")
   if(d4>1){tkplace(tmovieBut,"in"=spin,rely=.5,anchor="w",x=as.numeric(tkwinfo("reqwidth",spin)),height=80/4)}
   wiBox<-as.numeric(tkwinfo("reqwidth",intensity))+10
-  tkplace(intensity,relx=1,x=-wiBox,rely=0/4,y=10)
-  tkplace(MAX,relx=1,x=-wiBox,rely=1/4,y=10)
-  tkplace(MIN,relx=1,x=-wiBox,rely=2/4,y=10)
+  tkplace(intensity,relx=1,x=-wiBox*2,rely=1/5)
+  tkplace(MAX,relx=1,x=-wiBox*2,rely=2/5)
+  tkplace(MIN,relx=1,x=-wiBox*2,rely=3/5)
+  if(olay){
+  tkplace(intensityo,relx=1,x=-wiBox,rely=1/5)
+  tkplace(MAXo,relx=1,x=-wiBox,rely=2/5)
+  tkplace(MINo,relx=1,x=-wiBox,rely=3/5)
+  tkplace(oLab,"in"=intensityo,x=-5,y=-as.numeric(tkwinfo("reqheight",intensityo))*.75,anchor="w")
+  tkbind(MAXo, "<Return>",function()maxminChangeO())
+  tkbind(MINo, "<Return>",function()maxminChangeO())
+  }
   tkplace(intensLab,'in'=intensity,x=-1,rely=.5,anchor="e",height=80/4)
   tkplace(maxLab,'in'=MAX,x=-1,rely=.5,anchor="e",height=80/4)
   tkplace(minLab,'in'=MIN,x=-1,rely=.5,anchor="e",height=80/4)
+  tkplace(baseLab,"in"=intensity,x=0,y=-as.numeric(tkwinfo("reqheight",intensity))*.75,anchor="w")
+  ###########################
+  ######## BINDINGS #########
+  ###########################
   tkbind(MAX, "<Return>",function()maxminChange())
   tkbind(MIN, "<Return>",function()maxminChange())
   tkbind(coX, "<Return>",function()onSpin())
@@ -550,7 +621,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkbind(img1, "<Button-1>",OnLeftClick1)
   tkbind(img1, "<B1-Motion>",OnLeftClick1)
   ###########################
-  ##### BINDINGS ############
+  ##### Configure ###########
   ###########################
   tkconfigure(img1,cursor="crosshair")
   tkwm.resizable(base,FALSE,FALSE)
@@ -571,6 +642,7 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkadd(topMenu,"cascade", label = "Check Reg",menu=checkRegMenu)
   tkadd(saveAsMenu, "command", label = ".png",command=savePNG)
   tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
+  tkadd(overlayMenu, "checkbutton", label = "Image", variable=ovLay, onvalue=1 ,offvalue=0,command=overLay)
   if(!null2){tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)}
   tkconfigure(base, menu = topMenu)
   if(ret){return(orig)}
