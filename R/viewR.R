@@ -78,8 +78,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   X<-tclVar(tclvalue(xl))
   Y<-tclVar(tclvalue(yl))
   Z<-tclVar(tclvalue(zl))
-  wRange<-RNiftyReg::voxelToWorld(matrix(c(1,1,1,d1,d2,d3),byrow = TRUE,ncol=3),orig)
-  worldInit<-RNiftyReg::voxelToWorld(c(xx,yy,zz),orig)
+  wRange<-round(RNiftyReg::voxelToWorld(matrix(c(1,1,1,d1,d2,d3),byrow = TRUE,ncol=3),orig))
+  worldInit<-round(RNiftyReg::voxelToWorld(c(xx,yy,zz),orig))
   Xw<-tclVar(worldInit[1])
   Yw<-tclVar(worldInit[2])
   Zw<-tclVar(worldInit[3])
@@ -306,14 +306,13 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     }
   }
   onSpinW<-function(){
-    xw<-strtoi(tclvalue(Xw))
-    yw<-strtoi(tclvalue(Yw))
-    zw<-strtoi(tclvalue(Zw))
+    suppressWarnings(xw<-as.numeric(tclvalue(Xw)))
+    suppressWarnings(yw<-as.numeric(tclvalue(Yw)))
+    suppressWarnings(zw<-as.numeric(tclvalue(Zw)))
     voxCo<-RNiftyReg::worldToVoxel(points = c(xw,yw,zw),image = orig)
     
   if(is.na(voxCo[1])){
       tclvalue(xl)<<-as.character(xx)
-      tclvalue(X)<<-as.character(xx)
     }else{
       xl<-voxCo[1]
       x<-round(xl)
@@ -322,7 +321,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     
     if(is.na(voxCo[2])){
       tclvalue(yl)<<-as.character(yy)
-      tclvalue(Y)<<-as.character(yy)
     }else{
       yl<-voxCo[2]
       y<-round(yl)
@@ -331,7 +329,6 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     
     if(is.na(voxCo[3])){
       tclvalue(zl)<<-as.character(zz)
-      tclvalue(Z)<<-as.character(zz)
     }else{
       zl<-voxCo[3]
       z<-round(zl)
@@ -578,3 +575,8 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkconfigure(base, menu = topMenu)
   if(ret){return(orig)}
 }
+
+library(tkrplot)
+mni<-readNii(system.file("extdata","mni.nii.gz",package="FIACH"))
+viewR(init)
+
