@@ -13,10 +13,10 @@ viewR(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{data}{
-A 3D/4D array. If the array has an attribute named pixdim viewR will try and adjust the aspect appropriately. If NULL an interactive file selector will open to select the images one would like to view. If file paths to 3D/4D images are supplied they will be read and displayed. Multiple 3D files will be concatenated if the dimensions match. viewR can then be ran in movie mode. Currently this viewR does not display world coordinates. Instead voxel coordinates are used. As such it does not enforce information obtained from nifti headers.
+A 3D/4D array. If the array has an attribute named pixdim viewR will try and adjust the aspect appropriately. If NULL an interactive file selector will open to select the images one would like to view. If file paths to 3D/4D images are supplied they will be read and displayed. Multiple 3D files will be concatenated if the dimensions match. viewR can then be ran in movie mode. 
 }
 \item{otherData}{
-other
+A nifti image of the same dimensions which will also be displayed.
 }
 \item{xyz}{
 numeric vector indicating initial voxel coordinates.
@@ -28,14 +28,12 @@ Logical indicating if read data should be returned.
 \value{
 If ret is set to TRUE the data will be returned.
 }
-
+\details{
+Currently this viewR displays "world" coordinates as well as voxel coordiantes. The "world" coordinates are obtained by transforming the voxel coordinates using the qform matrix in the nifti header.
+}
 \examples{
  \dontrun{
-url <- "http://nifti.nimh.nih.gov/nifti-1/data/filtered_func_data.nii.gz"
-urlfile <- tempfile(pattern="filtered_func_data", fileext=".nii.gz")
-download.file(url, urlfile, quiet=TRUE)
-data<-readNii(urlfile)
-viewR(data)
-## Try coordinate  47,25,10
+file<-system.file("extdata","mni.nii.gz",package="FIACH")
+viewR(file)
 }
 }
