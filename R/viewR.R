@@ -575,8 +575,3 @@ viewR<-function(data=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkconfigure(base, menu = topMenu)
   if(ret){return(orig)}
 }
-
-library(tkrplot)
-mni<-readNii(system.file("extdata","mni.nii.gz",package="FIACH"))
-viewR(init)
-
