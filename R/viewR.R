@@ -128,6 +128,7 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tktitle(base)<-"Display"
   master<-tkframe(parent=base)
   f1<-tkframe(parent = master)
+  
   #########################
   ##### FUNCTIONS #########
   #########################
@@ -149,6 +150,10 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     tclvalue(time)<<-t
     
     lim<-c(as.numeric(tclvalue(low)),as.numeric(tclvalue(high)))
+    olim<-c()
+    o1<-c()
+    o2<-c()
+    o3<-c()
     if(any(is.na(lim))){lim<-r;tclvalue(low)<<-r[1];tclvalue(high)<<-r[2]}
     tclvalue(intens)<<-round(data[x,y,z,t],digits = 2)
     if(tclvalue(ovLay)=="1" && olay){
@@ -162,20 +167,23 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     im1<-data[,y,,t]
     im1[im1<lim[1]]<-lim[1]
     im1[im1>lim[2]]<-lim[2]
+    o1[o1>olim[2]]<-olim[2]
     image(1:d1,1:d3,z=im1,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
-    if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d3,z=o1,useRaster=TRUE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
+    if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d3,z=o1,useRaster=FALSE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = zl,v = xl,col="green")
     im2<-data[x,,,t]
     im2[im2<lim[1]]<-lim[1]
     im2[im2>lim[2]]<-lim[2]
+    o2[o2>olim[2]]<-olim[2]
     image(1:d2,1:d3,z=im2,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
-    if(tclvalue(ovLay)=="1" && olay){image(1:d2,1:d3,z=o2,useRaster=TRUE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
+    if(tclvalue(ovLay)=="1" && olay){image(1:d2,1:d3,z=o2,useRaster=FALSE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = zl,v = yl,col="green")
     im3<-data[,,z,t]
     im3[im3<lim[1]]<-lim[1]
     im3[im3>lim[2]]<-lim[2]
+    o3[o3>olim[2]]<-olim[2]
     image(1:d1,1:d2,z=im3,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
-    if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d2,z=o3,useRaster=TRUE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
+    if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d2,z=o3,useRaster=FALSE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = yl,v = xl,col="green")
     if(d4>1){
       tseries<-data[x,y,z,]
@@ -502,7 +510,7 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       w<-as.numeric(tclvalue(width))
       h<-as.numeric(tclvalue(height))
       r<-as.numeric(tclvalue(res))
-      png(filename = tkgetSaveFile(),width = w,height = h,res =r)
+      png(filename = tclvalue(tkgetSaveFile()),width = w,height = h,res =r)
       plotf()
       dev.off()
       tkdestroy(Jwin)
@@ -513,6 +521,7 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   overLay<-function(){
     tkrplot::tkrreplot(img1)
   }
+  
   ##########################
   ###### THE PLOTS #########
   ##########################
@@ -620,6 +629,7 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkbind(img1, "<Button-3>",crossHairs)
   tkbind(img1, "<Button-1>",OnLeftClick1)
   tkbind(img1, "<B1-Motion>",OnLeftClick1)
+  tkbind(base,"<Destroy>",function() unloadNamespace("tkrplot"))
   ###########################
   ##### Configure ###########
   ###########################
@@ -631,7 +641,10 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###########################
   ####### MENUS #############
   ###########################
+  warnOption<-options("warn")
+  options(warn=-1)
   topMenu <- tkmenu(base,tearoff=FALSE)
+  tkconfigure(base, menu = topMenu)
   fileMenu <- tkmenu(topMenu, tearoff = FALSE)
   tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
   saveAsMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
@@ -644,6 +657,6 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
   tkadd(overlayMenu, "checkbutton", label = "Image", variable=ovLay, onvalue=1 ,offvalue=0,command=overLay)
   if(!null2){tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)}
-  tkconfigure(base, menu = topMenu)
+  options(warn=warnOption$warn)
   if(ret){return(orig)}
 }
