@@ -128,7 +128,6 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tktitle(base)<-"Display"
   master<-tkframe(parent=base)
   f1<-tkframe(parent = master)
-  
   #########################
   ##### FUNCTIONS #########
   #########################
@@ -629,7 +628,6 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkbind(img1, "<Button-3>",crossHairs)
   tkbind(img1, "<Button-1>",OnLeftClick1)
   tkbind(img1, "<B1-Motion>",OnLeftClick1)
-  tkbind(base,"<Destroy>",function() unloadNamespace("tkrplot"))
   ###########################
   ##### Configure ###########
   ###########################
@@ -641,13 +639,13 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###########################
   ####### MENUS #############
   ###########################
-  warnOption<-options("warn")
-  options(warn=-1)
+  origWarn<-getOption(x = "warn")
+  options(warn = -1)
   topMenu <- tkmenu(base,tearoff=FALSE)
   tkconfigure(base, menu = topMenu)
   fileMenu <- tkmenu(topMenu, tearoff = FALSE)
   tkadd(topMenu, "cascade", label = "File", menu = fileMenu)
-  saveAsMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
+  saveAsMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cacaded menu
   tkadd(fileMenu, "cascade", label = "Save as", menu = saveAsMenu)
   overlayMenu <- tkmenu(topMenu, tearoff = FALSE)  # Our cascaded menu
   tkadd(topMenu,"cascade", label = "Overlay",menu=overlayMenu)
@@ -657,6 +655,7 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   tkadd(checkRegMenu, "checkbutton",label="MNI 2mm Iso", variable=cRegMNI, onvalue=1 ,offvalue=0,command=checkRegMNI)
   tkadd(overlayMenu, "checkbutton", label = "Image", variable=ovLay, onvalue=1 ,offvalue=0,command=overLay)
   if(!null2){tkadd(checkRegMenu, "checkbutton",label="Image", variable=cReg, onvalue=1 ,offvalue=0,command=checkReg)}
-  options(warn=warnOption$warn)
+  suppressWarnings(options(warn=1))
+  suppressWarnings(options(warn=origWarn))
   if(ret){return(orig)}
 }
