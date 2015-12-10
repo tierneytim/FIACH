@@ -538,12 +538,12 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   }
   f5<-tkframe(parent=master,
               width=as.numeric(tkwinfo("reqwidth",img1)),
-              height=100,
+              height=150,
               borderwidth=0,
               relief="groove")
   f6<-tkframe(parent=master,
               width=as.numeric(tkwinfo("reqwidth",img1)),
-              height=100,
+              height=150,
               borderwidth=0,
               relief="groove")
   tkgrid(master,columnspan=2,rowspan=2)
@@ -583,10 +583,10 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
   ###### GEOMETRY ##########
   ##########################
   tkgrid(f5,column=0,row=1)
-  tkplace(coXLab,relx=0,rely=1/5)
-  tkplace(coYLab,relx=0,rely=2/5)
-  tkplace(coZLab,relx=0,rely=3/5)
-  tkplace(coTLab,relx=0,rely=4/5)
+  tkplace(coXLab,relx=0,rely=1/6)
+  tkplace(coYLab,relx=0,rely=2/6)
+  tkplace(coZLab,relx=0,rely=3/6)
+  tkplace(coTLab,relx=0,rely=4/6)
   tkplace(coX,'in'=coXLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
   tkplace(coY,'in'=coYLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
   tkplace(coZ,'in'=coZLab,x=as.numeric(tkwinfo("reqwidth",coTLab)),rely=.5,anchor="w",height=100/5)
