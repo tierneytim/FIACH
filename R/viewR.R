@@ -184,11 +184,23 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
     image(1:d1,1:d2,z=im3,useRaster=TRUE,col=grey(1:100/100),axes=FALSE,zlim=lim)
     if(tclvalue(ovLay)=="1" && olay){image(1:d1,1:d2,z=o3,useRaster=FALSE,col=hotMetal(100),axes=FALSE,add=TRUE,zlim = olim)}
     if(crossHairsOn) abline(h = yl,v = xl,col="green")
-    if(d4>1){
+    if(d4>1 && tclvalue(ovLay)=="0"){
       tseries<-data[x,y,z,]
       plot(1:d4,tseries,type="l",axes=FALSE,col="grey",xlim=c(1,d4))
       points(x = t,y = tseries[t],col="green")
     }
+    if(tclvalue(ovLay)=="1" && olay){
+      ran<-round(seq(olim[1],to = olim[2],length.out = 5),digits = 2)
+      image(as.matrix(1),useRaster=TRUE,col="black",axes=FALSE)
+      rasterImage(image = rev(hotMetal(32)),xleft = -.1,xright = .1,ybottom = -.7,ytop = .7)
+      lines(x = c(-.15,-.15),y = c(-.7,.7),col="white")
+      lines(x = c(-.2,-.15),y = c(-.7,-.7),col="white")
+      lines(x = c(-.2,-.15),y = c(-.35,-.35),col="white")
+      lines(x = c(-.2,-.15),y = c(0,0),col="white")
+      lines(x = c(-.2,-.15),y = c(.7,.7),col="white")
+      lines(x = c(-.2,-.15),y = c(.35,.35),col="white")
+      text(x = rep(-.5,5),y = seq(-.7,.7,length.out = 5),labels = as.character(ran),col = "white")
+      }
     parPlotSize1 <<- par("plt")
     usrCoords1   <<- par("usr")
     
@@ -279,7 +291,7 @@ viewR<-function(data=NULL,overlay=NULL,otherData=NULL,xyz=NULL,ret=FALSE){
       tclvalue(yl)<<-yl
       tclvalue(Y)<<-round(yl)
     }
-    if(yClick>yBorder&&xClick>xBorder &&d4>1 &&xClick<width && yClick<=height){
+    if(yClick>yBorder&&xClick>xBorder &&d4>1 &&xClick<width && yClick<=height && tclvalue(ovLay)=="0"){
       first<-1.04-.04*d4
       last<- -.04+1.04*d4
       s<-round(first):round(last)
