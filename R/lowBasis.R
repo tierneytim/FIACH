@@ -1,5 +1,4 @@
 lowBasis <-function(N,freq,tr){
-  
   K<-round(2*(N*tr/(freq + 1)))
   n <- t(0:(N-1))
   C <- matrix(0,N,N)

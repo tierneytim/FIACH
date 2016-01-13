@@ -236,3 +236,15 @@ RcppExport SEXP FIACH_icombine(SEXP XSEXP, SEXP dimSEXP) {
   return __result;
   END_RCPP
 }
+//allDets
+arma::mat allDets(Rcpp::NumericMatrix cps, arma::mat Alpha);
+RcppExport SEXP FIACH_allDets(SEXP cpsSEXP, SEXP AlphaSEXP) {
+  BEGIN_RCPP
+  Rcpp::RObject __result;
+  Rcpp::RNGScope __rngScope;
+  Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type cps(cpsSEXP);
+  Rcpp::traits::input_parameter< arma::mat >::type Alpha(AlphaSEXP);
+  __result = Rcpp::wrap(allDets(cps, Alpha));
+  return __result;
+  END_RCPP
+}

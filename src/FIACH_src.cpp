@@ -502,3 +502,14 @@ IntegerVector icombine(Rcpp::IntegerVector X,Rcpp::IntegerVector dim){
   out.attr("dim")= IntegerVector::create(dim(0),dim(1),dim(2),dim(3));
   return(out);
 }
+
+// [[Rcpp::export]]
+arma::mat allDets(Rcpp::NumericMatrix cps, arma::mat Alpha) {
+  int n = cps.ncol();
+  arma::mat out(n,1);
+  for (int i = 0; i<n; i++){
+    arma::mat tmp(cps(_,i).begin(),7,7,false,false);
+    out(i,0) = arma::det(Alpha - tmp);
+  }
+  return(out);
+}

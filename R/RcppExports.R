@@ -135,3 +135,7 @@ erode <- function(input, k) {
 .dcombine<-function(X,dim){
   .Call('FIACH_dcombine', PACKAGE = 'FIACH', X, dim)
 }
+
+.allDets<-function(cps, Alpha){
+  .Call('FIACH_allDets', PACKAGE = 'FIACH', cps, Alpha)
+}
