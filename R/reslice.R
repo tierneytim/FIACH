@@ -1,4 +1,4 @@
-reslice<-function(data,newDim,currentDim=NULL){
+reslice<-function(data,newDim,currentDim=NULL,interpolation=3L){
   dOld<-dim(data)
   if(length(dOld)==4){targ<-updateNifti(data[,,,1],template = data);dOld<-dOld[1:3]}else{
     targ<-data
@@ -11,7 +11,7 @@ reslice<-function(data,newDim,currentDim=NULL){
   if(isImage(object = data,unsure = FALSE)){currentDim<-RNiftyReg::pixdim(data)[1:3]}
   
   aff<-RNiftyReg::buildAffine(scales=currentDim/newDim,source=targ)
-  res<-RNiftyReg::applyTransform(transform = aff,x = data)
+  res<-RNiftyReg::applyTransform(transform = aff,x = data,interpolation = interpolation)
   if(!isImage(object = data,unsure = FALSE)){pixdim(res)<-newDim}
   return(res)
 }
