@@ -14,5 +14,5 @@ Imports: Rcpp (>= 0.11.4), RNiftyReg (>= 2.0.0), utils,
 Suggests: tkrplot
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
-Packaged: 2015-09-20 18:07:37 UTC; Nerevar
+Packaged: 2016-4-03 18:07:37 UTC; Nerevar
 URL: http://www.homepages.ucl.ac.uk/~ucjttie/FIACH.html
