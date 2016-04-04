@@ -138,16 +138,15 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
   ######## MASK CREATION ##############
   #####################################
   meds<-colMedian(mat)                                                                                             
-  mask.mat<-kmeansMask(meds)
+  mask.mat<-kmeansMask(meds,retFit = TRUE)
+  fit<-mask.mat$fit
+  mask.mat<-mask.mat$mask
   vf<-sum(mask.mat)/length(mask.mat)
-  bss0<-(mean(meds[mask.mat==0])-mean(meds))^2*(sum(mask.mat==0))
-  bss1<-(mean(meds[mask.mat==1])-mean(meds))^2*(sum(mask.mat==1))
-  bss<-bss0+bss1
-  tss<-sum((meds-mean(meds))^2)
-  fit<-bss/tss
-  if(vf<.25 & fit< .8 ){
+  if(fit<.8){
     print("As the k-means clustering did not have a good fit the mask was construced using quantiles. Is there a large receive field bias in your data?")
-    mask.mat<-quantMask(meds)}
+    cut<-mean(meds)*.7
+    mask.mat<-ifelse(meds<=cut,0,1)
+    }
   mask.arr<-matArr(mask.mat,dim=c(dim(data)[1:3],1)) 
   small.brain<-mat[,mask.mat==1]
   print("Brain Extraction Completed")
