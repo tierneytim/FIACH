@@ -130,6 +130,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   rpOutName<-paste(dir[1],"rp.txt",sep="/")
   rpPlotOutName<-paste(dir[1],"rp.pdf",sep="/")
   outCode<-getDatatype(input = files)
+  unsigned<-(outCode=="char"||outCode=="uint16"||outCode=="uint32"||outCode=="uint64")
   ##########################
   ####### GRADIENTS ########
   ##########################
@@ -183,6 +184,10 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     rp[j,]<-c(hmm$translation,hmm$angles)                                                     ## get translations and rotations
     finAff<-buildAffine(translation = rp[j,1:3],angles = rp[j,4:6],source = sourceF)          ## build the final affine
     reg<-applyTransform(transform = finAff,x = sourceF)                                       ## apply final affine to input images
+    if(unsigned){
+      print("setting negative values to zero as input has an usigned datatype")
+    reg[reg<0]<-0
+      }
     if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
   }                 
   #############################
