@@ -12,8 +12,5 @@ There was one NOTE on Ubutu 12.04.
 Maintainer: 'Tim Tierney <fiachmri@gmail.com>'
 Checking URLs requires 'libcurl' support in the R build
 
-* FIACH is currently not building on Mavericks (due to an X11 issue?).
-* If possible, please advise how best to address this issue.
-
 ## Downstream dependencies
 Threre are currently no downstream dependencies
