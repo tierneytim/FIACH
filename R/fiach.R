@@ -82,7 +82,7 @@
   return(mask.arr)
 }
 
-fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
+fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=TRUE,quantileMask=.7){
   ################################################################
   ########### DIA DHUIT A CHARA, CHONAS ATA TU? ##################
   ########### BHUEL NA BI AG CAOINE.            ##################
@@ -106,6 +106,8 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
   if(!is.character(input)){stop("input should be character strings")}
   exists<-file.exists(input)
   if(!all(exists)){stop("At least one of the specified functional files does not exist")}
+  if(!is.logical(defaultMask)){stop("defaultMask must be either TRUE or FALSE")}
+  if(quantileMask<0||quantileMask>1){stop("quantileMask must be a real number between 0 and 1")}
   #####################################
   ######## DATA READ ##################
   #####################################
@@ -142,9 +144,9 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96){
   fit<-mask.mat$fit
   mask.mat<-mask.mat$mask
   vf<-sum(mask.mat)/length(mask.mat)
-  if(fit<.8){
+  if(fit<.8||!defaultMask){
     print("As the k-means clustering did not have a good fit the mask was construced using quantiles. Is there a large receive field bias in your data?")
-    cut<-mean(meds)*.7
+    cut<-mean(meds)*quantileMask
     mask.mat<-ifelse(meds<=cut,0,1)
     }
   mask.arr<-matArr(mask.mat,dim=c(dim(data)[1:3],1)) 

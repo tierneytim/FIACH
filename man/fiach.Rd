@@ -7,7 +7,7 @@ FIACH
 This function makes use of The EM algorithm to segment and model noisy areas of the brain. It also utilizes a thresholded spline filter to clean spurious observations in the image.
 }
 \usage{
-fiach(input, t, tr, rp=NULL, maxgap = 1, freq = 128,nMads = 1.96)
+fiach(input, t, tr, rp=NULL, maxgap = 1, freq = 128,nMads = 1.96,defaultMask=TRUE,quantileMask=.7)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +32,12 @@ Desired frequency to high pass filter data at. Specified in seconds. CAUTION!!! 
 
   \item{nMads}{
 Number of MADs used for noise calculation.
+}
+  \item{defaultMask}{
+  Logical indicating if default masking using kmeans clustering is used.
+}
+  \item{quantileMask}{
+  The quantile level used to indicate the user specified mask (similar to SPM). 
 }
 
 }
