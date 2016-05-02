@@ -7,7 +7,8 @@ FIACH
 This function makes use of The EM algorithm to segment and model noisy areas of the brain. It also utilizes a thresholded spline filter to clean spurious observations in the image.
 }
 \usage{
-fiach(input, t, tr, rp=NULL, maxgap = 1, freq = 128,nMads = 1.96,defaultMask=TRUE,quantileMask=.7)
+fiach(input, t, tr, rp=NULL, maxgap = 1, freq = 128,nMads = 1.96,
+defaultMask=TRUE, quantileMask=.7)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
