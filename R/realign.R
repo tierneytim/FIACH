@@ -157,11 +157,14 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   ##### REGISTRATION #########
   ############################
   print("Registering and Reslicing")
+
+  pb <- txtProgressBar(style = 3)
   for (j in 1:length(files)) {                                                               ## main loop over images
     if(j==1){
       reg<-targ
       if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
       rp[j,]<-0
+      setTxtProgressBar(pb, j/length(files))
       next
     }
     sourceF<-readNii(input = files[j])
@@ -189,7 +192,9 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     reg[reg<0]<-0
       }
     if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
-  }                 
+    setTxtProgressBar(pb, j/length(files))
+  } 
+  close(pb)
   #############################
   ######## PARAMETRS ##########
   #############################
