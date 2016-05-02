@@ -1,25 +1,42 @@
-.qformFix<-function(image){
+.getOrigin<-function(fname){
+  
+  gzipped<-grepl(pattern = "gz$",x = fname)
+  if(gzipped){stop("getOrigin does not support gzipped headers")}
+  
+  hdr<-grepl(pattern = "[.]hdr",x = fname)
+  img<-grepl(pattern = "[.]img$",x = fname)
+  if(img){
+    fin<-gsub(pattern ="[.]img$",replacement =".hdr",x = fname)
+  }else{
+    fin<-fname
+  }
+  
+  fid <- file(fin, "rb")
+  endian<-.Platform$endian
+  sizeof.hdr <- readBin(fid, integer(), size=4, endian=endian)
+  if (sizeof.hdr != 348) {
+    close(fid)
+    endian <- "swap"
+    fid <- file(fin, "rb")
+  }
+  rubbish<- readBin(fid, raw(),n = 249 ,size=1, endian=endian)
+  origin<-readBin(fid, integer(), n = 5, size=2, endian=endian)[3:5]
+  close(fid)
+  return(origin)
+} 
+
+.qformFix<-function(image,origin){
   hdr<-dumpNifti(image)
   mat<-diag(4)
   d<-dim(image)[1:3]
   if(any(is.na(dim(image)[1:3]))){stop("qformFix does not support Images with less than 3 dimensions")}
-  diag(mat)[1:3]<-pixdim(image)[1:3]
+  diag(mat)[1:3]<-abs(pixdim(image)[1:3])*c(1,1,1)
   if(hdr$magic==""){
-    trans<-round(d*3/2)
-    trans[1:3]<-trans*c(1,-1,-1)
-    mat[1,1]<-mat[1,1]*-1
+    trans<- -((origin-1)*abs(pixdim(image)[1:3]))
     mat[1:3,4]<-trans
     invisible(qform(image)<-structure(.Data = mat,code=2))
     invisible(sform(image)<-structure(.Data = mat,code=2))
-  }else{
-    qi<-xform(image,TRUE)
-    mat[1:3,4]<-qi[1:3,4]
-    if(sign(qi[1,1])==-1){
-      mat[1,1]<-mat[1,1]*-1
-    }
-    invisible(qform(image)<-structure(.Data = mat,code=2))
-    invisible(sform(image)<-structure(.Data = mat,code=2))
-  } 
+  }
 }                                                           
 .makeA <- function(im){
   ## spatial derivatives(x,y,z,roll,pitch,yaw)
@@ -78,7 +95,7 @@
   
   
   while(det1/det0>=quality){
-    dets<-.allDets(cps = cps,Alpha = Alpha)
+    dets<-FIACH:::.allDets(cps = cps,Alpha = Alpha)
     msk<-order(det1-dets)
     msk<-msk[1:round(length(dets)/10)]
     A0<-A0[-msk,]
@@ -114,7 +131,10 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   ##########################
   print("Assuming target image is first image")
   targ<-RNiftyReg::readNifti(files[1])
-  .qformFix(targ)
+  anlz<-dumpNifti(files[1])$magic==""
+  origin<-c(NULL,NULL,NULL)
+  if(anlz){origin<-.getOrigin(files[1])}
+  .qformFix(targ,origin)
   print("Fixing target q/s form")
   pix <- pixdim(targ)                                                                 ## pixel dimensions(assume all are same)
   aff0<-buildAffine(scales = pix[1:3]/4,source = drop(targ))                          ## initial affine used to rescale  target 
@@ -168,7 +188,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
       next
     }
     sourceF<-readNii(input = files[j])
-    .qformFix(sourceF)
+    .qformFix(sourceF,origin = origin)
     rfunc<-applyTransform(transform = aff0,interpolation = 1,x = sourceF)
     for (i in 1:maxit) {                                                                    ## registration loop
       Fl <- applyTransform(transform = aff,x = rfunc,interpolation = 1)[co[[1]]]              ## apply potentially updated transform                                                       ## the masked target as a vector
