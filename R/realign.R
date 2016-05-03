@@ -30,10 +30,10 @@
   mat<-diag(4)
   d<-dim(image)[1:3]
   if(any(is.na(dim(image)[1:3]))){stop("qformFix does not support Images with less than 3 dimensions")}
-  diag(mat)[1:3]<-abs(pixdim(image)[1:3])*c(1,1,1)
+  diag(mat)[1:3]<-abs(pixdim(image)[1:3])*c(-1,1,1)
   if(hdr$magic==""){
     trans<- -((origin-1)*abs(pixdim(image)[1:3]))
-    mat[1:3,4]<-trans
+    mat[1:3,4]<-trans*c(-1,1,1)
     invisible(qform(image)<-structure(.Data = mat,code=2))
     invisible(sform(image)<-structure(.Data = mat,code=2))
   }
