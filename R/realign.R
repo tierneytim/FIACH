@@ -95,7 +95,7 @@
   
   
   while(det1/det0>=quality){
-    dets<-FIACH:::.allDets(cps = cps,Alpha = Alpha)
+    dets<-.allDets(cps = cps,Alpha = Alpha)
     msk<-order(det1-dets)
     msk<-msk[1:round(length(dets)/10)]
     A0<-A0[-msk,]
