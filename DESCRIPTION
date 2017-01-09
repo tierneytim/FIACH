@@ -2,7 +2,7 @@ Package: FIACH
 Type: Package
 Title: Retrospective Noise Control for fMRI
 Version: 0.1.3
-Date: 2016-05-01
+Date: 2016-06-06
 Author: Tim Tierney
 Maintainer: Tim Tierney <fiachmri@gmail.com>
 Repository: CRAN

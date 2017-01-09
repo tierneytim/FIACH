@@ -36,17 +36,6 @@
     mat[1:3,4]<-trans*c(-1,1,1)
     invisible(qform(image)<-structure(.Data = mat,code=2))
     invisible(sform(image)<-structure(.Data = mat,code=2))
-  }else{
-    mat<-diag(4)
-    qf<-xform(image)
-    pix<-pixdim(image)[1:3]
-    si<-sign(diag(qf))[1:3]
-    diag(mat)[1:3]<-pix*si
-    trans<- -si*((origin-1)*abs(pixdim(image)[1:3]))
-    mat[1:3,4]<-trans
-    invisible(qform(image)<-structure(.Data = mat,code=2))
-    invisible(sform(image)<-structure(.Data = mat,code=2))
-    
   }
 }                                                           
 .makeA <- function(im){
@@ -106,7 +95,7 @@
   
   
   while(det1/det0>=quality){
-    dets<-FIACH:::.allDets(cps = cps,Alpha = Alpha)
+    dets<-.allDets(cps = cps,Alpha = Alpha)
     msk<-order(det1-dets)
     msk<-msk[1:round(length(dets)/10)]
     A0<-A0[-msk,]
