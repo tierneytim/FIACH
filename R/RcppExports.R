@@ -139,3 +139,21 @@ erode <- function(input, k) {
 .allDets<-function(cps, Alpha){
   .Call('FIACH_allDets', PACKAGE = 'FIACH', cps, Alpha)
 }
+
+
+.concat1 <- function(x, margin) {
+  .Call('FIACH_concat1', PACKAGE = 'FIACH', x, margin)
+}
+
+.concat2 <- function(x, margin, y) {
+  invisible(.Call('FIACH_concat2', PACKAGE = 'FIACH', x, margin, y))
+}
+
+.tclObject <- function(input, update) {
+  invisible(.Call('FIACH_tclObject', PACKAGE = 'FIACH', input, update))
+}
+
+.hextest <- function(input, palette, currentmax, currentmin, out) {
+  invisible(.Call('FIACH_hextest', PACKAGE = 'FIACH', input, palette, currentmax, currentmin, out))
+}
+

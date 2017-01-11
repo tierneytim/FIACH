@@ -248,3 +248,52 @@ RcppExport SEXP FIACH_allDets(SEXP cpsSEXP, SEXP AlphaSEXP) {
   return __result;
   END_RCPP
 }
+// concat1
+Rcpp::CharacterVector concat1(Rcpp::CharacterMatrix x, int margin);
+RcppExport SEXP FIACH_concat1(SEXP xSEXP, SEXP marginSEXP) {
+  BEGIN_RCPP
+  Rcpp::RObject rcpp_result_gen;
+  Rcpp::RNGScope rcpp_rngScope_gen;
+  Rcpp::traits::input_parameter< Rcpp::CharacterMatrix >::type x(xSEXP);
+  Rcpp::traits::input_parameter< int >::type margin(marginSEXP);
+  rcpp_result_gen = Rcpp::wrap(concat1(x, margin));
+  return rcpp_result_gen;
+  END_RCPP
+}
+// concat2
+void concat2(Rcpp::CharacterMatrix x, int margin, Rcpp::CharacterVector y);
+RcppExport SEXP FIACH_concat2(SEXP xSEXP, SEXP marginSEXP, SEXP ySEXP) {
+  BEGIN_RCPP
+  Rcpp::RNGScope rcpp_rngScope_gen;
+  Rcpp::traits::input_parameter< Rcpp::CharacterMatrix >::type x(xSEXP);
+  Rcpp::traits::input_parameter< int >::type margin(marginSEXP);
+  Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type y(ySEXP);
+  concat2(x, margin, y);
+  return R_NilValue;
+  END_RCPP
+}
+// tclObject
+void tclObject(SEXP input, std::string update);
+RcppExport SEXP FIACH_tclObject(SEXP inputSEXP, SEXP updateSEXP) {
+  BEGIN_RCPP
+  Rcpp::RNGScope rcpp_rngScope_gen;
+  Rcpp::traits::input_parameter< SEXP >::type input(inputSEXP);
+  Rcpp::traits::input_parameter< std::string >::type update(updateSEXP);
+  tclObject(input, update);
+  return R_NilValue;
+  END_RCPP
+}
+// hextest
+void hextest(Rcpp::NumericVector input, Rcpp::CharacterVector palette, double currentmax, double currentmin, Rcpp::CharacterVector out);
+RcppExport SEXP FIACH_hextest(SEXP inputSEXP, SEXP paletteSEXP, SEXP currentmaxSEXP, SEXP currentminSEXP, SEXP outSEXP) {
+  BEGIN_RCPP
+  Rcpp::RNGScope rcpp_rngScope_gen;
+  Rcpp::traits::input_parameter< Rcpp::NumericVector >::type input(inputSEXP);
+  Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type palette(paletteSEXP);
+  Rcpp::traits::input_parameter< double >::type currentmax(currentmaxSEXP);
+  Rcpp::traits::input_parameter< double >::type currentmin(currentminSEXP);
+  Rcpp::traits::input_parameter< Rcpp::CharacterVector >::type out(outSEXP);
+  hextest(input, palette, currentmax, currentmin, out);
+  return R_NilValue;
+  END_RCPP
+}

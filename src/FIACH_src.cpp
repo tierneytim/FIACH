@@ -1,5 +1,6 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
+#include <tcl.h>
 using namespace Rcpp;
 // [[Rcpp::export]]
 arma::mat badData(Rcpp::NumericMatrix X,NumericVector meds,NumericVector mads,double nMads,double t) {
@@ -512,4 +513,115 @@ arma::mat allDets(Rcpp::NumericMatrix cps, arma::mat Alpha) {
     out(i,0) = arma::det(Alpha - tmp);
   }
   return(out);
+}
+
+// [[Rcpp::export]]
+void hextest(Rcpp::NumericVector input,
+             Rcpp::CharacterVector palette,
+             double currentmax,double currentmin,
+             Rcpp::CharacterVector out) {
+  int n = input.size();
+  Rcpp::IntegerVector dims = input.attr("dim");
+  double range = 255.0/(currentmax-currentmin);
+  for(int i=0;i<n;i++){
+    int index =(input[i]-currentmin)*range;
+    if(index<0){
+      index=0;
+    }else if(index>255){
+      index = 255;
+    }
+    out[i] = palette[index];
+  }
+}
+
+// [[Rcpp::export]]
+Rcpp::CharacterVector concat1(Rcpp::CharacterMatrix  x, int margin){
+  int n = x.nrow();
+  int p = x.ncol();
+  int size;
+  std::string temp;
+  
+  if(margin==2){
+    size = p;
+  }else{
+    size = n;
+  }
+  Rcpp::CharacterVector y(size);
+  
+  if(margin==2){
+    for(int i = 0;i < p;i++){
+      for(int j = 0;j < n;j++){
+        temp.append(x(j,i));
+        temp.append(" ");
+        
+      }
+      y(i) = temp;
+      temp.clear();
+    }
+  }
+  
+  if(margin==1){
+    for(int j = 0;j < n;j++){
+      for(int i = 0;i < p;i++){
+        temp.append(x(j,i));
+        temp.append(" ");
+        
+      }
+      y(j) = temp;
+      temp.clear();
+    }
+  }
+  
+  return y;
+}
+
+// [[Rcpp::export]]
+void concat2(Rcpp::CharacterMatrix  x, int margin,Rcpp::CharacterVector y){
+  int n = x.nrow();
+  int p = x.ncol();
+  std::string temp;
+  
+    //     Rcpp::CharacterVector y(size);
+  
+  if(margin==2){
+    temp.reserve(8*n);
+    for(int i = 0;i < p;i++){
+      for(int j = 0;j < n;j++){
+        // temp.append(x(j,i));
+        // temp.append(" ");
+        // temp1 = x(j,i);
+        temp+=x(j,i);
+        temp+=" ";
+        
+      }
+      y[i] = temp;
+      temp.clear();
+    }
+  }
+  
+  if(margin==1){
+    for(int j = 0;j < n;j++){
+      for(int i = 0;i < p;i++){
+        temp.append(x(j,i));
+        temp.append(" ");
+        
+      }
+      y[j] = temp;
+      temp.clear();
+    }
+  }
+  
+  //return y;
+}
+
+// [[Rcpp::export]]
+void tclObject(SEXP input,std::string update){
+  Tcl_Obj *tclObjectPointer = (Tcl_Obj *)R_ExternalPtrAddr(input);  // Cast void pointer to tcl_Obj pointer
+  int stringLength = tclObjectPointer->length;                      // get length of string in tclobject
+  const char *updateStringPointer = update.c_str();                 // create a pointer ot the string you wisht to update the tclobject with
+  char *inputStringPointer =(tclObjectPointer->bytes);              // get pointer  to field of tclObject containing the data
+  
+  for(int i =0;i<stringLength;i++){                                 // loop over input..
+    *(inputStringPointer+i) = *(updateStringPointer+i);               // assign update to input
+  }
 }
