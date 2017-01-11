@@ -40,6 +40,7 @@ viewNew<-function(data=NULL){
   ##################################
   # 3 image windows and a utilities window in a master window 
   top <- tktoplevel()
+  tktitle(top)<-"Display"
   master<-tkframe(parent=top)
   img<-tkframe(parent = master)
   f1<-tkframe(parent = img)
