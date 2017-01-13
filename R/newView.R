@@ -264,31 +264,43 @@ viewNew<-function(data=NULL){
   ##################################
   ######## INITIAL #################
   ##################################
+  xlabel<-sample(0:9,size = 10,replace = TRUE)
+  ylabel<-sample(0:9,size = 10,replace = TRUE)
+  zlabel<-sample(0:9,size = 10,replace = TRUE)
   
   # Create the base x,y and z photo images
-  .Tcl("image create photo hmmx")
-  .Tcl("image create photo hmmy")
-  .Tcl("image create photo hmmz")
+  #.Tcl("image create photo hmmx")
+  # .Tcl("image create photo hmmy")
+  # .Tcl("image create photo hmmz")
+  .Tcl(paste("image create photo h",paste(xlabel,collapse = ""),sep = ""))
+  .Tcl(paste("image create photo h",paste(ylabel,collapse = ""),sep = ""))
+  .Tcl(paste("image create photo h",paste(zlabel,collapse = ""),sep = ""))
   
   # Create the intermediary x,y and z photo images
-  .Tcl("image create photo shmmx")
-  .Tcl("image create photo shmmy")
-  .Tcl("image create photo shmmz")
+  # .Tcl("image create photo shmmx")
+  # .Tcl("image create photo shmmy")
+  # .Tcl("image create photo shmmz")
+  .Tcl(paste("image create photo sh",paste(xlabel,collapse = ""),sep = ""))
+  .Tcl(paste("image create photo sh",paste(ylabel,collapse = ""),sep = ""))
+  .Tcl(paste("image create photo sh",paste(zlabel,collapse = ""),sep = ""))
   
   # Create the final x,y and z photo images
-  xImageCallback<-.Tcl("image create photo rhmmx")
-  yImageCallback<-.Tcl("image create photo rhmmy")
-  zImageCallback<-.Tcl("image create photo rhmmz")
+  # xImageCallback<-.Tcl("image create photo rhmmx")
+  # yImageCallback<-.Tcl("image create photo rhmmy")
+  # zImageCallback<-.Tcl("image create photo rhmmz")
+  xImageCallback<-.Tcl(paste("image create photo rh",paste(xlabel,collapse = ""),sep = ""))
+  yImageCallback<-.Tcl(paste("image create photo rh",paste(ylabel,collapse = ""),sep = ""))
+  zImageCallback<-.Tcl(paste("image create photo rh",paste(zlabel,collapse = ""),sep = ""))
   
   # attach the final images to a tk widget so they can be displayed
-  lx <- tklabel(f1, image = "rhmmx")
-  ly <- tklabel(f2, image = "rhmmy")
-  lz <- tklabel(f3, image = "rhmmz")
+  lx <- tklabel(f1, image = paste("rh",paste(xlabel,collapse = ""),sep = ""))
+  ly <- tklabel(f2, image = paste("rh",paste(ylabel,collapse = ""),sep = ""))
+  lz <- tklabel(f3, image = paste("rh",paste(zlabel,collapse = ""),sep = ""))
   
   # create the arguements that will be passed to tclk
-  tclArgZ<-.Tcl.args.objv("hmmz","put",cmdz)
-  tclArgY<-.Tcl.args.objv("hmmy","put",cmdy)
-  tclArgX<-.Tcl.args.objv("hmmx","put",cmdx)
+  tclArgZ<-.Tcl.args.objv(paste("h",paste(xlabel,collapse = ""),sep = ""),"put",cmdz)
+  tclArgY<-.Tcl.args.objv(paste("h",paste(ylabel,collapse = ""),sep = ""),"put",cmdy)
+  tclArgX<-.Tcl.args.objv(paste("h",paste(zlabel,collapse = ""),sep = ""),"put",cmdx)
   
   # put the actual data in the image using the arguments above
   zPutCallback<-.Tcl.objv(tclArgZ)
