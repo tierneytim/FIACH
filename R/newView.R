@@ -48,6 +48,7 @@ viewNew<-function(data=NULL){
   f3<-tkframe(parent = img)
   f4<-tkframe(parent = img)
   f5<-tkframe(parent = master,borderwidth=5,relief="groove")
+  myfont <- tkfont.create(family="Arial",size=9)
   ##################################
   ####### GLOBAL VARIABLES #########
   ##################################
@@ -431,7 +432,7 @@ viewNew<-function(data=NULL){
     xyzLineLength[1]<<-as.numeric(tkwinfo("reqwidth",f3))
     xyzLineLength[2]<<-as.numeric(tkwinfo("reqheight",f3))
     xyzLineLength[3]<<-as.numeric(tkwinfo("reqheight",f1))
-    tkconfigure(f5,height=100,width=as.numeric(tkwinfo("width",img)))
+    #tkconfigure(f5,height=100,width=as.numeric(tkwinfo("width",img)))
     
     if(d[4]>1){
       x<-0:(d[4]-1)
@@ -473,28 +474,28 @@ viewNew<-function(data=NULL){
   coZw<-tkentry(f5,textvariable=Zw,state="readonly",readonlybackground="white")
   
   # labels for the voxel coordinates
-  coXLab<-tklabel(parent = f5,text="X")
-  coYLab<-tklabel(parent = f5,text="Y")
-  coZLab<-tklabel(parent = f5,text="Z")
+  coXLab<-tklabel(parent = f5,text="X",font=myfont)
+  coYLab<-tklabel(parent = f5,text="Y",font=myfont)
+  coZLab<-tklabel(parent = f5,text="Z",font=myfont)
   if(dim(func)[4]>1){
-    coTLab<-tklabel(parent = f5,text="T")
+    coTLab<-tklabel(parent = f5,text="T",font=myfont)
   }
   
   # voxel and world labels
-  voxLab<-tklabel(parent=f5,text="Voxel")
-  worldLab<-tklabel(parent=f5,text="World")
+  voxLab<-tklabel(parent=f5,text="Voxel",font=myfont)
+  worldLab<-tklabel(parent=f5,text="World",font=myfont)
   
   #  max/min/intensity widgets and labels
   MAX<-tkentry(f5,textvariable=high)
   MIN<-tkentry(f5,textvariable=low)
   intensity<-tkentry(f5,textvariable=intens,state="readonly",readonlybackground="white")
-  maxLab<-tklabel(parent = f5,text="Max")
-  minLab<-tklabel(parent = f5,text="Min")
-  intensLab<-tklabel(parent=f5,text="Intensity")
-  baseLab<-tklabel(parent=f5,text="Base  ")
+  maxLab<-tklabel(parent = f5,text="Max",font=myfont)
+  minLab<-tklabel(parent = f5,text="Min",font=myfont)
+  intensLab<-tklabel(parent=f5,text="Intensity",font=myfont)
+  baseLab<-tklabel(parent=f5,text="Base  ",font=myfont)
   
   # movie button
-  tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie")
+  tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie",font=myfont)
   
   #oLab<-tklabel(parent=f5,text="Overlay")
   #oMAX<-tkentry(f5,textvariable=ohigh)
