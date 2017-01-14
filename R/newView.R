@@ -469,13 +469,19 @@ viewNew<-function(data=NULL){
       cw<-as.numeric(tkwinfo("reqwidth",canvas))
       xfac<-cw/max(x)
       xnew<-x*xfac
+   
+      if(sum(y)!=0){
       yfac<-ch*.8/diff(range(y))
       ynew<-ch-((y-min(y))*yfac+ch*.1)
+      py<-ch-((y[t]-min(y))*yfac+ch*.1)
+      }else{
+        ynew<-rep(ch/2,length(y))
+        py<-ch/2
+      }
       s<-round(c(rbind(xnew,ynew)))
       .Tcl(paste(canvas$ID,"delete all"))
       .Tcl(paste(canvas$ID,"create line" ,paste(s,collapse=" "), '-fill grey -tags "myline"'))
-      py<-ch-((y[t]-min(y))*yfac+ch*.1)
-      px<-(t-1)*xfac
+       px<-(t-1)*xfac
       .Tcl(paste(canvas$ID,"create oval" ,
                  paste(px-3,py-3,px+3,py+3,
                        collapse=" "), '-outline #00ff00 -tags "mypoint"'))
