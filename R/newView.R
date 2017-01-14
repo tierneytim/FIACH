@@ -16,6 +16,7 @@ viewNew<-function(data=NULL){
     func<-data
   }  
   #olay<-readNifti(file)
+  func<-zeroNa(func)
   ##################################
   ######## ASPECT RATIO ############
   ##################################
