@@ -16,7 +16,6 @@ viewNew<-function(data=NULL){
     func<-data
   }  
   #olay<-readNifti(file)
-  
   ##################################
   ######## ASPECT RATIO ############
   ##################################
@@ -267,40 +266,50 @@ viewNew<-function(data=NULL){
   xlabel<-sample(0:9,size = 10,replace = TRUE)
   ylabel<-sample(0:9,size = 10,replace = TRUE)
   zlabel<-sample(0:9,size = 10,replace = TRUE)
+  hmmx<-paste("h",paste(xlabel,collapse = ""),sep = "")
+  hmmy<-paste("h",paste(ylabel,collapse = ""),sep = "")
+  hmmz<-paste("h",paste(zlabel,collapse = ""),sep = "")
+  shx<-paste("sh",paste(xlabel,collapse = ""),sep = "")
+  shy<-paste("sh",paste(ylabel,collapse = ""),sep = "")
+  shz<-paste("sh",paste(zlabel,collapse = ""),sep = "")
+  rhx<-paste("rh",paste(xlabel,collapse = ""),sep = "")
+  rhy<-paste("rh",paste(ylabel,collapse = ""),sep = "")
+  rhz<-paste("rh",paste(zlabel,collapse = ""),sep = "")
   
   # Create the base x,y and z photo images
   #.Tcl("image create photo hmmx")
   # .Tcl("image create photo hmmy")
   # .Tcl("image create photo hmmz")
-  .Tcl(paste("image create photo h",paste(xlabel,collapse = ""),sep = ""))
-  .Tcl(paste("image create photo h",paste(ylabel,collapse = ""),sep = ""))
-  .Tcl(paste("image create photo h",paste(zlabel,collapse = ""),sep = ""))
+  .Tcl(paste("image create photo",hmmx))
+  .Tcl(paste("image create photo",hmmy))
+  .Tcl(paste("image create photo",hmmz))
   
   # Create the intermediary x,y and z photo images
   # .Tcl("image create photo shmmx")
   # .Tcl("image create photo shmmy")
   # .Tcl("image create photo shmmz")
-  .Tcl(paste("image create photo sh",paste(xlabel,collapse = ""),sep = ""))
-  .Tcl(paste("image create photo sh",paste(ylabel,collapse = ""),sep = ""))
-  .Tcl(paste("image create photo sh",paste(zlabel,collapse = ""),sep = ""))
-  
+  .Tcl(paste("image create photo",shx))
+  .Tcl(paste("image create photo",shy))
+  .Tcl(paste("image create photo",shz))
+                 
   # Create the final x,y and z photo images
   # xImageCallback<-.Tcl("image create photo rhmmx")
   # yImageCallback<-.Tcl("image create photo rhmmy")
   # zImageCallback<-.Tcl("image create photo rhmmz")
-  xImageCallback<-.Tcl(paste("image create photo rh",paste(xlabel,collapse = ""),sep = ""))
-  yImageCallback<-.Tcl(paste("image create photo rh",paste(ylabel,collapse = ""),sep = ""))
-  zImageCallback<-.Tcl(paste("image create photo rh",paste(zlabel,collapse = ""),sep = ""))
+  xImageCallback<-.Tcl(paste("image create photo",rhx))
+  yImageCallback<-.Tcl(paste("image create photo",rhy))
+  zImageCallback<-.Tcl(paste("image create photo",rhz))
+                       
   
   # attach the final images to a tk widget so they can be displayed
-  lx <- tklabel(f1, image = paste("rh",paste(xlabel,collapse = ""),sep = ""))
-  ly <- tklabel(f2, image = paste("rh",paste(ylabel,collapse = ""),sep = ""))
-  lz <- tklabel(f3, image = paste("rh",paste(zlabel,collapse = ""),sep = ""))
+  lx <- tklabel(f1, image = rhx)
+  ly <- tklabel(f2, image = rhy)
+  lz <- tklabel(f3, image = rhz)
   
   # create the arguements that will be passed to tclk
-  tclArgZ<-.Tcl.args.objv(paste("h",paste(xlabel,collapse = ""),sep = ""),"put",cmdz)
-  tclArgY<-.Tcl.args.objv(paste("h",paste(ylabel,collapse = ""),sep = ""),"put",cmdy)
-  tclArgX<-.Tcl.args.objv(paste("h",paste(zlabel,collapse = ""),sep = ""),"put",cmdx)
+  tclArgZ<-.Tcl.args.objv(hmmz,"put",cmdz)
+  tclArgY<-.Tcl.args.objv(hmmy,"put",cmdy)
+  tclArgX<-.Tcl.args.objv(hmmx,"put",cmdx)
   
   # put the actual data in the image using the arguments above
   zPutCallback<-.Tcl.objv(tclArgZ)
@@ -362,20 +371,20 @@ viewNew<-function(data=NULL){
     wx<-round(d[2]*zoom/subsamp)
     hx<-round(d[3]*zoom/subsamp*rat1[1]/rat1[2])
     
-    
     # set height and width  of images
-    .Tcl(paste("rhmmz configure -width",wz,"-height",hz)) #1/2
-    .Tcl(paste("rhmmy configure -width",wy,"-height",hy))#1/2
-    .Tcl(paste("rhmmx configure -width",wx,"-height",hx))#1/2
+    # .Tcl(paste("rhmmz configure -width",wz,"-height",hz)) #1/2
+    # .Tcl(paste("rhmmy configure -width",wy,"-height",hy))#1/2
+    # .Tcl(paste("rhmmx configure -width",wx,"-height",hx))#1/2
+    .Tcl(paste( rhz, "configure -width",wz,"-height",hz))#1/2
+    .Tcl(paste( rhy, "configure -width",wy,"-height",hy))#1/2
+    .Tcl(paste( rhx, "configure -width",wx,"-height",hx))#1/2
     
     # create a local copy of image 
     locFunc<-get("func")
     
     # get the intensity at crosshair location
     tclvalue(intens)<<-round(locFunc[xyz[1],xyz[2],xyz[3],t],digits = 3)
-    
-    
-    
+
     if(!click3){
       # in place modification of im3   
       .hextest(input = locFunc[,,xyz[3],t],palette = palette,currentmax = ma,currentmin = mi,out = im3)
@@ -393,7 +402,8 @@ viewNew<-function(data=NULL){
       zPutCallback<<-.Tcl.objv(tclArgZ)
       
       # zoom by the factor zoom 3
-      .Tcl(paste("shmmz copy hmmz -zoom",zoom3))
+      #.Tcl(paste("shmmz copy hmmz -zoom",zoom3))
+       .Tcl(paste(shz,"copy",hmmz, "-zoom",zoom3))
     }
     if(!click2){
       # same as previous but for different image 
@@ -403,7 +413,8 @@ viewNew<-function(data=NULL){
       cmdy<<-paste("{",p2," }",sep = "")
       .tclObject( tclArgY[[3]],update = cmdy)
       yPutCallback<<-.Tcl.objv(tclArgY)
-      .Tcl(paste("shmmy copy hmmy -zoom",zoom2))
+      #.Tcl(paste("shmmy copy hmmy -zoom",zoom2))
+      .Tcl(paste(shy,"copy", hmmy,"-zoom",zoom2))
     }
     if(!click1){
       # same as previous but for different image 
@@ -413,38 +424,42 @@ viewNew<-function(data=NULL){
       cmdx<<-paste("{",p1," }",sep = "")
       .tclObject( tclArgX[[3]],update = cmdx)
       xPutCallback<<-.Tcl.objv(tclArgX)
-      .Tcl(paste("shmmx copy hmmx -zoom",zoom1))
-      .Tcl(paste("rhmmx copy shmmx  -subsample",subsamp1))
+      #.Tcl(paste("shmmx copy hmmx -zoom",zoom1))
+      #.Tcl(paste("rhmmx copy shmmx  -subsample",subsamp1))
+      .Tcl(paste(shx,"copy", hmmx,"-zoom",zoom1))
     }
     
     #final image is  the subsampled  version of the zoomed image 
-    .Tcl(paste("rhmmz copy shmmz -subsample",subsamp3))
-    .Tcl(paste("rhmmy copy shmmy -subsample",subsamp2))
-    .Tcl(paste("rhmmx copy shmmx -subsample",subsamp1))
+    # .Tcl(paste("rhmmz copy shmmz -subsample",subsamp3))
+    # .Tcl(paste("rhmmy copy shmmy -subsample",subsamp2))
+    # .Tcl(paste("rhmmx copy shmmx -subsample",subsamp1))
+    .Tcl(paste(rhz,"copy", shz, "-subsample",subsamp3))
+    .Tcl(paste(rhy,"copy", shy, "-subsample",subsamp2))
+    .Tcl(paste(rhx,"copy", shx, "-subsample",subsamp1))
     
-    # places green line at coordinate
-    if(crosshairsOn){
-      cmd<-paste("rhmmx put  #00FF00 -to",xyzLineLength[2]-xyzL[2],0,xyzLineLength[2]-xyzL[2]+1,xyzLineLength[3])
+     places green line at coordinate
+     if(crosshairsOn){
+      cmd<-paste(rhx,"put  #00FF00 -to",xyzLineLength[2]-xyzL[2],0,xyzLineLength[2]-xyzL[2]+1,xyzLineLength[3])
       .Tcl(cmd)
-      cmd<-paste("rhmmx put  #00FF00 -to",0,xyzL[3],xyzLineLength[2],xyzL[3]+1)
+      cmd<-paste(rhx, "put  #00FF00 -to",0,xyzL[3],xyzLineLength[2],xyzL[3]+1)
       .Tcl(cmd)
-      
-      cmd<-paste("rhmmz put  #00FF00 -to",0,xyzL[2],xyzLineLength[1],xyzL[2]-1)
+
+      cmd<-paste(rhz,"put  #00FF00 -to",0,xyzL[2],xyzLineLength[1],xyzL[2]-1)
       .Tcl(cmd)
-      cmd<-paste("rhmmz put  #00FF00 -to",xyzL[1],0,xyzL[1]+1,xyzLineLength[2])
+      cmd<-paste(rhz,"put  #00FF00 -to",xyzL[1],0,xyzL[1]+1,xyzLineLength[2])
       .Tcl(cmd)
-      
-      cmd<-paste("rhmmy put  #00FF00 -to",0,xyzL[3],xyzLineLength[2],xyzL[3]+1)
+
+      cmd<-paste(rhy,"put  #00FF00 -to",0,xyzL[3],xyzLineLength[2],xyzL[3]+1)
       .Tcl(cmd)
-      cmd<-paste("rhmmy put  #00FF00 -to",xyzL[1],0,xyzL[1]+1,xyzLineLength[3])
+      cmd<-paste(rhy,"put  #00FF00 -to",xyzL[1],0,xyzL[1]+1,xyzLineLength[3])
       .Tcl(cmd)}
-    
-    
+    # 
+    # 
     # update green line lengths and size of bottom frame(potential for resizing)
     xyzLineLength[1]<<-as.numeric(tkwinfo("reqwidth",f3))
     xyzLineLength[2]<<-as.numeric(tkwinfo("reqheight",f3))
     xyzLineLength[3]<<-as.numeric(tkwinfo("reqheight",f1))
-    #tkconfigure(f5,height=100,width=as.numeric(tkwinfo("width",img)))
+    tkconfigure(f5,height=100,width=as.numeric(tkwinfo("width",img)))
     
     if(d[4]>1){
       x<-0:(d[4]-1)
@@ -524,17 +539,25 @@ viewNew<-function(data=NULL){
   tkgrid(lx)
   tkgrid(ly)
   tkgrid(lz)
+  # canvas <- tkcanvas(f4, relief="raised",background="black",
+  #                    width=as.numeric(.Tcl("image width rhmmy")),
+  #                    height=as.numeric(.Tcl("image height rhmmz")))
   canvas <- tkcanvas(f4, relief="raised",background="black",
-                     width=as.numeric(.Tcl("image width rhmmy")),
-                     height=as.numeric(.Tcl("image height rhmmz")))
+                     width=as.numeric(.Tcl(paste("image width" ,rhy))),
+                     height=as.numeric(.Tcl(paste("image width" ,rhz))))
+  #paste("rh",paste(zlabel,collapse = ""))
   tkgrid(canvas)
   reslicer(coNew = xyz,zoom = zoom,subsamp = subsamp)
   crossHairs()
   crossHairs()
   if(d[4]>1){
+    # tkconfigure(canvas,
+    #             height=as.numeric(.Tcl("image height rhmmz")),
+    #             width=as.numeric(.Tcl("image width rhmmy"))
+    # )
     tkconfigure(canvas,
-                height=as.numeric(.Tcl("image height rhmmz")),
-                width=as.numeric(.Tcl("image width rhmmy"))
+                height=as.numeric(.Tcl(paste("image width" ,rhz))),
+                width=as.numeric(.Tcl(paste("image width" ,rhy)))
     )
   }
   tkgrid(f5)
