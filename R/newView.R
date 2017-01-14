@@ -438,7 +438,7 @@ viewNew<-function(data=NULL){
     .Tcl(paste(rhy,"copy", shy, "-subsample",subsamp2))
     .Tcl(paste(rhx,"copy", shx, "-subsample",subsamp1))
     
-     places green line at coordinate
+    # places green line at coordinate
      if(crosshairsOn){
       cmd<-paste(rhx,"put  #00FF00 -to",xyzLineLength[2]-xyzL[2],0,xyzLineLength[2]-xyzL[2]+1,xyzLineLength[3])
       .Tcl(cmd)
