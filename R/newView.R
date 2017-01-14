@@ -580,6 +580,7 @@ viewNew<-function(data=NULL){
   tkplace(coX,"in"=coXLab,x=as.numeric(tkwinfo("reqwidth",coXLab)),width=boxWidth,height=boxHeight)
   tkplace(coY,"in"=coYLab,x=as.numeric(tkwinfo("reqwidth",coXLab)),width=boxWidth,height=boxHeight)
   tkplace(coZ,"in"=coZLab,x=as.numeric(tkwinfo("reqwidth",coXLab)),width=boxWidth,height=boxHeight)
+  Sys.sleep(.1)
   tkplace(coXw,"in"=coXLab,x=as.numeric(tkwinfo("width",coX))*1.3,width=boxWidth,height=boxHeight)
   tkplace(coYw,"in"=coYLab,x=as.numeric(tkwinfo("width",coX))*1.3,width=boxWidth,height=boxHeight)
   tkplace(coZw,"in"=coZLab,x=as.numeric(tkwinfo("width",coX))*1.3,width=boxWidth,height=boxHeight)
