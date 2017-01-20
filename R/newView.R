@@ -27,7 +27,7 @@ viewNew<-function(data=NULL){
   ##################################
   
   # pixel dimensions needed to get aspect ratio right
-  pix<-RNiftyReg::pixdim(func)[1:3]
+  pix<-abs(RNiftyReg::pixdim(func)[1:3])
   # vector containing the aspect ratios for each image
   asp<-c(pix[2]/pix[3],pix[1]/pix[3],pix[1]/pix[2])
   
