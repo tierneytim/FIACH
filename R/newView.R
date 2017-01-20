@@ -16,7 +16,7 @@ viewNew<-function(data=NULL){
     func<-data
   }  
   #olay<-readNifti(file)
-  func<-zeroNa(func)
+  func<-RNiftyReg::updateNifti(zeroNa(func),template = func)
   ##################################
   ######## ASPECT RATIO ############
   ##################################
