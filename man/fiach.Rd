@@ -19,7 +19,7 @@ A character vector containing a single string or multiple strings. If multiple s
 A threshold expressed in percent signal change beyond which the spline filter is used. This threshold is ideally computed using boldContrast.
 }
   \item{tr}{
-The time between scans. Needed for the high pass filtering. 
+The time between scans(specified in seconds). Needed for the high pass filtering. 
 }
   \item{rp}{
 The realignment parameter files that will be appended with additional regressors.  
