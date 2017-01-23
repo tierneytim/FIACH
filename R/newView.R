@@ -15,8 +15,13 @@ viewNew<-function(data=NULL){
   }else{
     func<-data
   }  
+   cl<-class(func)
+  if(cl!="niftiImage" && cl!="nifti" && cl!="array"){
+    stop(paste("class: ",cl," is not supported.\n niftiImage, arrays, characters and nifti(experimental) classes are supported.\n A NULL argument for data is also supported "))
+  }
   #olay<-readNifti(file)
-  func<-RNiftyReg::updateNifti(zeroNa(func),template = func)
+  Meta<-RNiftyReg::dumpNifti(func)
+  func<-RNiftyReg::updateNifti(zeroNa(func),template = Meta)
   ##################################
   ######## ASPECT RATIO ############
   ##################################
