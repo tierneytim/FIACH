@@ -19,5 +19,7 @@ Returns a  vector of length three containing the origin. This may be nonsensical
 }
 
 \examples{
-## to do ##
+file<-system.file("extdata","avg152T1.hdr.gz",package="FIACH")
+getAnalyzeOrigin(file)
+
 }
