@@ -4,9 +4,6 @@ getAnalyzeOrigin<-function(fname){
   hdr<-RNiftyReg::dumpNifti(fname)
   if(hdr$magic!=""){stop("This file does not appear to be an Analyze file")}
   
-  # verify if image is compressed
-  gzipped<-grepl(pattern = "gz$",x = fname)
-  
   # work out if the file is the header or the image
   hdr<-grepl(pattern = "[.]hdr",x = fname)
   img<-grepl(pattern = "[.]img",x = fname)
@@ -19,11 +16,7 @@ getAnalyzeOrigin<-function(fname){
   }
   
   # open the file 
-  if(gzipped){
-    fid<-gzfile(fin,"rb")
-  }else{
-    fid <- file(fin, "rb")
-  }
+  fid<-gzfile(fin,"rb")
   
   # try the platform endianness to read the file
   endian<-.Platform$endian
@@ -37,12 +30,8 @@ getAnalyzeOrigin<-function(fname){
     endian <- "swap"
   
     # reopen the file   
-    if(gzipped){ 
     fid <- gzfile(fin, "rb")
-    }else{
-    fid <- file(fin, "rb")
-    }
-    
+
     # get proper size of header and check we've got it right
     sizeof.hdr <- readBin(fid, integer(), size=4, endian=endian)
     if (sizeof.hdr != 348){stop("endianness could not be established and file could not be read")}
