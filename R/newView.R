@@ -22,6 +22,12 @@ viewNew<-function(data=NULL){
   #olay<-readNifti(file)
   Meta<-RNiftyReg::dumpNifti(func)
   func<-RNiftyReg::updateNifti(zeroNa(func),template = Meta)
+  
+  if(Meta$magic==""&& class(data)=="character"){
+    o<-getAnalyzeOrigin(data)
+  .qformFix(func,origin=o)
+  }
+  
   ##################################
   ######## ASPECT RATIO ############
   ##################################
@@ -636,4 +642,8 @@ viewNew<-function(data=NULL){
   
   #do not make window resizable
   tkwm.resizable(top,FALSE,FALSE)
+  if(Meta$magic==""){
+  tcltk::tkmessageBox(parent=top,message = "Warning: This image appears to be an Analyze image.\nThis format is only partially supported. Orientation\n may be incorrect.", 
+                                            icon = "warning", type = "ok")
+  }
 }
