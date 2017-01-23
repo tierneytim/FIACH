@@ -1,30 +1,3 @@
-.getOrigin<-function(fname){
-  
-  gzipped<-grepl(pattern = "gz$",x = fname)
-  if(gzipped){stop("getOrigin does not support gzipped headers")}
-  
-  hdr<-grepl(pattern = "[.]hdr",x = fname)
-  img<-grepl(pattern = "[.]img$",x = fname)
-  if(img){
-    fin<-gsub(pattern ="[.]img$",replacement =".hdr",x = fname)
-  }else{
-    fin<-fname
-  }
-  
-  fid <- file(fin, "rb")
-  endian<-.Platform$endian
-  sizeof.hdr <- readBin(fid, integer(), size=4, endian=endian)
-  if (sizeof.hdr != 348) {
-    close(fid)
-    endian <- "swap"
-    fid <- file(fin, "rb")
-  }
-  rubbish<- readBin(fid, raw(),n = 249 ,size=1, endian=endian)
-  origin<-readBin(fid, integer(), n = 5, size=2, endian=endian)[3:5]
-  close(fid)
-  return(origin)
-} 
-
 .qformFix<-function(image,origin){
   hdr<-dumpNifti(image)
   mat<-diag(4)
@@ -135,7 +108,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   qf<-xform(targ)
   pix<-pixdim(targ)[1:3]
   origin<-(abs(qf[1:3,4])+abs(pix))/pix
-  if(anlz){origin<-.getOrigin(files[1])}
+  if(anlz){origin<-getAnalyzeOrigin(files[1])}
   .qformFix(targ,origin)
   print("Fixing target q/s form")
   pix <- pixdim(targ)                                                                 ## pixel dimensions(assume all are same)
