@@ -141,7 +141,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   pix <- pixdim(targ)                                                                 ## pixel dimensions(assume all are same)
   aff0<-buildAffine(scales = pix[1:3]/4,source = drop(targ))                          ## initial affine used to rescale  target 
   print("Resampling target to Lower Resolution")
-  b <- applyTransform(drop(targ),transform = aff0)                                    ## (Ax = b)
+  b <- applyTransform(drop(targ),transform = aff0,internal=NA)                                    ## (Ax = b)
   ##########################
   ###### FILE MANAGEMENT ###
   ##########################
@@ -192,9 +192,9 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     }
     sourceF<-readNii(input = files[j])
     .qformFix(sourceF,origin = origin)
-    rfunc<-applyTransform(transform = aff0,interpolation = 1,x = sourceF)
+    rfunc<-applyTransform(transform = aff0,interpolation = 1,x = sourceF,internal=NA)
     for (i in 1:maxit) {                                                                    ## registration loop
-      Fl <- applyTransform(transform = aff,x = rfunc,interpolation = 1)[co[[1]]]              ## apply potentially updated transform                                                       ## the masked target as a vector
+      Fl <- applyTransform(transform = aff,x = rfunc,interpolation = 1,internal=NA)[co[[1]]]              ## apply potentially updated transform                                                       ## the masked target as a vector
       sc <- sbsub/sum(Fl)                                                                     ## ratio of the source and the target 
       b1 <- bsub - Fl * sc                                                                    ## scale source so mean intensity ~= target
       pss<-ss;                                                                                ## declare the previous sum of squares
@@ -209,7 +209,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     hmm<-decomposeAffine(aff)                                                                 ## decompose the rigid transformation
     rp[j,]<-c(hmm$translation,hmm$angles)                                                     ## get translations and rotations
     finAff<-buildAffine(translation = rp[j,1:3],angles = rp[j,4:6],source = sourceF)          ## build the final affine
-    reg<-applyTransform(transform = finAff,x = sourceF)                                       ## apply final affine to input images
+    reg<-applyTransform(transform = finAff,x = sourceF,internal = NA)                                       ## apply final affine to input images
     if(unsigned){
      reg[reg<0]<-0
       }

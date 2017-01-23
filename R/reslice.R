@@ -11,7 +11,7 @@ reslice<-function(data,newDim,currentDim=NULL,interpolation=3L){
   if(isImage(object = data,unsure = FALSE)){currentDim<-RNiftyReg::pixdim(data)[1:3]}
   
   aff<-RNiftyReg::buildAffine(scales=currentDim/newDim,source=targ)
-  res<-RNiftyReg::applyTransform(transform = aff,x = data,interpolation = interpolation)
+  res<-RNiftyReg::applyTransform(transform = aff,x = data,interpolation = interpolation,internal=NA)
   if(!isImage(object = data,unsure = FALSE)){pixdim(res)<-newDim}
   return(res)
 }
