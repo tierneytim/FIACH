@@ -86,6 +86,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   ####### GRADIENTS ########
   ##########################
   print("Constructing Derivatives")
+  A0 <- do.call("cbind",getImageDerivatives(b))                                                                          ## basis set of derivatives
   ###########################
   ### INTERESTING VOXELS ####
   ###########################
