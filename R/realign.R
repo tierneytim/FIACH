@@ -60,13 +60,12 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   print("Assuming target image is first image")
   targ<-RNiftyReg::readNifti(files[1])
   anlz<-dumpNifti(files[1])$magic==""
-  qf<-xform(targ)
   pix<-pixdim(targ)[1:3]
-  origin<-(abs(qf[1:3,4])+abs(pix))/pix
-  if(anlz){origin<-getAnalyzeOrigin(files[1])}
-  .qformFix(targ,origin)
-  print("Fixing target q/s form")
-  pix <- pixdim(targ)                                                                 ## pixel dimensions(assume all are same)
+  if(anlz){
+    origin<-getAnalyzeOrigin(files[1])
+    .qformFix(targ,origin)
+    print("Fixing target q/s form")
+  }
   aff0<-buildAffine(scales = pix[1:3]/4,source = drop(targ))                          ## initial affine used to rescale  target 
   print("Resampling target to Lower Resolution")
   b <- applyTransform(drop(targ),transform = aff0,internal=NA)                                    ## (Ax = b)
@@ -111,6 +110,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
 
   pb <- txtProgressBar(style = 3)
   for (j in 1:length(files)) {                                                               ## main loop over images
+    
     if(j==1){
       reg<-targ
       if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
@@ -118,9 +118,15 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
       setTxtProgressBar(pb, j/length(files))
       next
     }
+   
     sourceF<-readNii(input = files[j])
-    .qformFix(sourceF,origin = origin)
+    if(anlz){
+      .qformFix(sourceF,origin = origin)
+    }
+    aff0<-buildAffine(scales = pix[1:3]/4,source = drop(sourceF))                          ## initial affine used to rescale  target 
     rfunc<-applyTransform(transform = aff0,interpolation = 1,x = sourceF,internal=NA)
+    aff<-buildAffine(source = rfunc)
+    
     for (i in 1:maxit) {                                                                    ## registration loop
       Fl <- applyTransform(transform = aff,x = rfunc,interpolation = 1,internal=NA)[co[[1]]]              ## apply potentially updated transform                                                       ## the masked target as a vector
       sc <- sbsub/sum(Fl)                                                                     ## ratio of the source and the target 
@@ -134,13 +140,16 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
       tmp<-buildAffine(translation = soln[1:3],angles = soln[4:6],source = rfunc)             ## build affine with updates
       aff<-composeTransforms(transform1 = tmp,aff)                                            ## compose updates with previous solution
     }                                                                                       ## end registraion loop          
+    
     hmm<-decomposeAffine(aff)                                                                 ## decompose the rigid transformation
     rp[j,]<-c(hmm$translation,hmm$angles)                                                     ## get translations and rotations
     finAff<-buildAffine(translation = rp[j,1:3],angles = rp[j,4:6],source = sourceF)          ## build the final affine
     reg<-applyTransform(transform = finAff,x = sourceF,internal = NA)                                       ## apply final affine to input images
+    
     if(unsigned){
      reg[reg<0]<-0
       }
+   
     if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
     setTxtProgressBar(pb, j/length(files))
   } 
