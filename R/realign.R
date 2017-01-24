@@ -11,51 +11,6 @@
     invisible(sform(image)<-structure(.Data = mat,code=2))
   }
 }                                                           
-.makeA <- function(im){
-  ## spatial derivatives(x,y,z,roll,pitch,yaw)
-  ## see http://www.johndcook.com/blog/2015/11/21/numerical-differentiation/ 
-  
-  A <-matrix(0,nrow = length(im),ncol = 6)
-  h<-1e-3
-  
-  aff1<-buildAffine(translation=c(h,0,0),source = im)
-  aff2<-buildAffine(translation=c(-h,0,0),source = im)
-  xph<-applyTransform(transform = aff1,x =im)
-  xmh<-applyTransform(transform = aff2,x =im)
-  A[,1]<- (xph-xmh)/(2*h)
-  
-  aff1<-buildAffine(translation=c(0,h,0),source = im)
-  aff2<-buildAffine(translation=c(0,-h,0),source = im)
-  xph<-applyTransform(transform = aff1,x = im)
-  xmh<-applyTransform(transform = aff2,x = im)
-  A[,2]<- (xph-xmh)/(2*h)
-  
-  aff1<-buildAffine(translation=c(0,0,h),source = im)
-  aff2<-buildAffine(translation=c(0,0,-h),source = im)
-  xph<-applyTransform(transform = aff1,x = im)
-  xmh<-applyTransform(transform = aff2,x = im)
-  A[,3]<- (xph-xmh)/(2*h)
-  
-  aff1<-buildAffine(angles=c(h,0,0),source = im)
-  aff2<-buildAffine(angles=c(-h,0,0),source = im)
-  xph<-applyTransform(transform = aff1,x = im)
-  xmh<-applyTransform(transform = aff2,x = im)
-  A[,4]<- (xph-xmh)/(2*h)
-  
-  aff1<-buildAffine(angles=c(0,h,0),source = im)
-  aff2<-buildAffine(angles=c(0,-h,0),source = im)
-  xph<-applyTransform(transform = aff1,x = im)
-  xmh<-applyTransform(transform = aff2,x = im)
-  A[,5]<- (xph-xmh)/(2*h)
-  
-  aff1<-buildAffine(angles=c(0,0,h),source = im)
-  aff2<-buildAffine(angles=c(0,0,-h),source = im)
-  xph<-applyTransform(transform = aff1,x = im)
-  xmh<-applyTransform(transform = aff2,x = im)
-  A[,6]<- (xph-xmh)/(2*h)
-  
-  return(A)
-}
 .inVox <- function(A0,b,quality=.9,plotConvergence=FALSE){
   rat<-1
   Alpha<-cbind(A0,b)
@@ -131,7 +86,6 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   ####### GRADIENTS ########
   ##########################
   print("Constructing Derivatives")
-  A0 <- .makeA(b)                                                                           ## basis set of derivatives
   ###########################
   ### INTERESTING VOXELS ####
   ###########################
