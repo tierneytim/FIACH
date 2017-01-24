@@ -45,25 +45,44 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   print("Argument Check")
   
   ## files check (character and existance)
-  if(!is.character(files)){stop("input should be character strings")}
-  exists<-file.exists(files)
-  if(!all(exists)){stop("At least one of the specified functional files does not exist")}
+  if (!is.character(files)) {
+    stop("input should be character strings")
+  }
+  exists <- file.exists(files)
+  if (!all(exists)) {
+    stop("At least one of the specified functional files does not exist")
+  }
   
   # quality checks (numeric and between 0 and 1)
-  if(!is.numeric(quality)){stop("quality should be a real number between 0 and 1")}
-  if(quality==0){stop("quality must be greater than 0")}
-  if(quality>1){stop("quality must be less than or equal to 1")}
+  if (!is.numeric(quality)) {
+    stop("quality should be a real number between 0 and 1")
+  }
+  if (quality == 0) {
+    stop("quality must be greater than 0")
+  }
+  if (quality > 1) {
+    stop("quality must be less than or equal to 1")
+  }
   
   # dimension checks( equality and 4d files currently not allowed: i hope to fix this if i can access sub-bricks in RNifti )
-  dims<-do.call("rbind",lapply(files,function(x){dumpNifti(x)$dim}))
-  if(any(dims[,5]>1)){stop("Currently this function does not support  4D files")}
-  if(any(dims[1,]!=t(dims))){stop("Not all image dimensions are the same as the target image")}
+  hdims <- lapply(files, function(x) {dumpNifti(x)$dim})
+  dims <- do.call("rbind", hdims)
+  if (any(dims[, 5] > 1)) {
+    stop("Currently this function does not support  4D files")
+  }
+  if (any(dims[1, ] != t(dims))) {
+    stop("Not all image dimensions are the same as the target image")
+  }
   
   # write check (must be logical)
-  if(!is.logical(write)){stop("write must be TRUE or FALSE")}
+  if (!is.logical(write)) {
+    stop("write must be TRUE or FALSE")
+  }
   
   # plot convergence check (must be logical)
-  if(!is.logical(plotConvergence)){stop("plotConvergence must be TRUE or FALSE")}
+  if (!is.logical(plotConvergence)) {
+    stop("plotConvergence must be TRUE or FALSE")
+  }
   ##########################
   ### FILE READ ############
   ##########################
@@ -84,6 +103,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     .qformFix(targ,origin)
     print("Fixing target q/s form")
   }
+  
   ## affine matrix to downsample image to 4x4x4mm (same as SPM default).
   aff0<-buildAffine(scales = pix[1:3]/4,source = drop(targ))                          
   print("Resampling target to Lower Resolution")
@@ -149,16 +169,16 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   ##### REGISTRATION #########
   ############################
   print("Registering and Reslicing")
-
+  
   # initialise a progress bar
   pb <- txtProgressBar(style = 3)
-
+  
   # loop over j files
   for (j in 1:length(files)) {                                                               
     
     # if its the first image 
     if(j==1){
-     # the target image is left unchanged
+      # the target image is left unchanged
       reg<-targ
       # and written to disk
       if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
@@ -174,8 +194,8 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     
     # if analyze image is detected
     if(anlz){
-    # set the qform to something hopefully more appropriate
-    # a warning should have triggred earlier so I won't repeat
+      # set the qform to something hopefully more appropriate
+      # a warning should have triggred earlier so I won't repeat
       .qformFix(sourceF,origin = origin)
     }
     
@@ -206,7 +226,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
       ## define the convergence criteria
       if(i==1){conv<-Inf}else{conv<-(pss-ss)/pss}
       if(pss == 0){break()}
-    
+      
       ## finish if convergerd or max iterations are reached
       if ( conv< 1e-8 || i == maxit){break()}                                                 
       
@@ -229,11 +249,13 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
     
     ## set negative values to 0 if unsigned data is being used(really should change this behaviour)
     if(unsigned){
-     reg[reg<0]<-0
-      }
+      reg[reg<0]<-0
+    }
     
     ## If writing is requested then write the resliced images to a file
-    if(write){writeNifti(image = reg,file = outname[j],datatype = outCode)}
+    if (write) {
+      writeNifti(image = reg,file = outname[j],datatype = outCode)
+    }
     
     # update  the progress bar
     setTxtProgressBar(pb, j/length(files))
