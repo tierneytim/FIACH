@@ -1,2 +1,4 @@
 ^.*md$
 ^.git$
+applyAffine.cpp
+testAffine.R
