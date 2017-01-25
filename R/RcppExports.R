@@ -128,6 +128,10 @@ erode <- function(input, k) {
   if(is.vector(input)){input<-as.matrix(input)}
   .Call('FIACH_erode', PACKAGE = 'FIACH', input, k)
 }
+applyAffine <- function(yr, aff) {
+  
+  .Call('FIACH_applyAffine', PACKAGE = 'FIACH', yr, aff)
+}
 .icombine<-function(X,dim){
   .Call('FIACH_icombine', PACKAGE = 'FIACH', X, dim)
 }

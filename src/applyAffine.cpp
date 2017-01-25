@@ -1,6 +1,9 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
+
+#ifdef _OPENMP
 #include <omp.h>
+#endif
 
 // [[Rcpp::export]]
 Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
@@ -41,7 +44,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
   for(int i=1;i<z;i++){g3[i]=1/(4-g3[i-1]);}
   
   //Loop forward in X//
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
   for(int k = 1;k<(z+1);k++){ 
     for(int j = 1;j<(y+1);j++){ 
       for(int i = 2;i<(x);i++){
@@ -51,7 +56,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
   }
   
   // Loop Backward in X//
-#pragma omp parallel for 
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
   for(int k = (z);k>0; k--){ 
     for(int j = (y);j>0; j--){ 
       for(int i = (x-1);i>1;  i--){
@@ -69,7 +76,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
       -coeffx(arma::span(x-1,x-1),arma::span(0,y+1),arma::span(0,z+1));
       
       //Loop forward in y//
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
       for(int k = 0; k<(z+2);   k++){ 
         for(int j = 2; j<(y); j++){ 
           for(int i = 0; i<(x+2);   i++){
@@ -79,7 +88,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
       }
       
       // Loop Backward in y//
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
       for(int k = (z+1); k>-1;k--){ 
         for(int j = (y-1); j>1;   j--){ 
           for(int i = (x+1); i>-1;i--){
@@ -96,7 +107,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
           -coeffx(arma::span(0,x+1),arma::span(y-1,y-1),arma::span(0,z+1));
           
           //Loop forward in z//
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
           for(int j = 0; j<(y+2);j++){ 
             for(int k = 2; k<(z);k++){ 
               for(int i = 0; i<(x+2);i++){
@@ -105,7 +118,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
             }
           }
           // Loop Backward in z//
+#ifdef _OPENMP
 #pragma omp parallel for
+#endif
           for(int j = (y+1); j>-1;j--){ 
             for(int k = (z-1); k>1;k--){ 
               for(int i = (x+1); i>-1;i--){
@@ -131,7 +146,9 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff){
                 
               arma::mat sa = arma::inv(aff);
               
-  //          #pragma omp parallel for            // make it run in parallel... for "IMPRESSIVE" speedp
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif           // make it run in parallel... for "IMPRESSIVE" speedp
               for(int i = 0; i<nout;i++){       // loop over requested points and...
                 arma::vec ip(4);
                 ip[3] = 1;
