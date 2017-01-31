@@ -1,59 +1,168 @@
-library(Rcpp)
 library(FIACH)
 library(RNiftyReg)
-library(mmand)
-#sourceCpp("C:/Users/Nerevar/Desktop/work/applyAffine.cpp")
-  Sys.setenv("PKG_CXXFLAGS"="-fopenmp")
-  Sys.setenv("PKG_LIBS"="-fopenmp")
- sourceCpp("D:/applyAffine.cpp",dryRun = FALSE,verbose = TRUE,rebuild = TRUE)
+################################
+###### source---> target #######
+################################
+source <- readNifti(system.file("extdata", "epi_t2.nii.gz",package="RNiftyReg"))
+target <- readNifti(system.file("extdata", "flash_t1.nii.gz",package="RNiftyReg"))
 
-n<-64
-trans<-15
-test <- readNifti(system.file("extdata", "flash_t1.nii.gz",package="RNiftyReg"))
-pix<-pixdim(test)
-d<-dim(test)
+affReg<-buildAffine(source = source,target = target)
+affTim<-createAffine(source=source,target=target)
+
+reg1<-applyTransform(affReg,x = source)
+reg2<-applyAffine(source=source,aff = affTim)
+sd(reg1-reg2)
+
+invAffReg<-invertAffine(affReg)
+invAffTim<-inverseAffine(affTim)
+
+reg3<-applyTransform(invAffReg,x = reg1)                  
+var(reg3-source)
+reg4<-applyAffine(source = reg2,aff = invAffTim)
+var(reg4-source)
+###############################
+# source---> source(rigid) ####
+###############################
+source<-target
+
+affReg<-buildAffine(source = source,
+                    translation = c(6.4,-3.5,9.4),
+                    angles=c(.1,-.2,.3)
+                    )
+affTim<-createAffine(source=source,
+                     translation = c(6.4,-3.5,9.4),
+                     angles=c(.1,-.2,.3)
+                     )
+
+reg1<-applyTransform(affReg,x = source)
+reg2<-applyAffine(source=source,aff = affTim)
+sd(reg1-reg2)
+
+invAffReg<-invertAffine(affReg)
+invAffTim<-inverseAffine(affTim)
+
+reg3<-applyTransform(invAffReg,x = reg1)                  
+var(reg3-source)
+reg4<-applyAffineTim(source = reg2,aff = invAffTim)
+var(reg4-source)
+###############################
+# source---> source(affine) ###
+###############################
+translation =c(0,0,0)
+angles = c(0,0,0)
+skews = c(0,0,0)
+scales = c(1.2,1.3,1.7)
 
 
-aff2<-buildAffine(translation = c(6,6,6),source = test,
-                  angles = c(.05,.1,.3),
-                  skews = c(.03,.4,.1),
-                  scales=c(2,2,2))
-pixt<-pixdim(attributes(aff2)$target)
+affReg<-buildAffine(source = source,
+                      translation =translation,
+                      angles = angles,
+                      skews = skews,
+                      scales = scales)
+  
+affTim<-createAffine(source = source,
+                    translation =translation,
+                    angles = angles,
+                    skews = skews,
+                    scales = scales)
 
-Mt<-solve(xform(attributes(aff2)$target))
-sc<-diag(4)
-sc[1:3,4]<-c(-1,1,1)
-Ma<-solve(aff2%*%sc)
-Ms<-xform(test)
-aff1<-Mt%*%Ma%*%Ms
+reg1<-applyTransform(affReg,x = source)
+reg2<-applyAffine(source=source,aff = affTim)
+sd(reg1-reg2)
 
-#aff1<-sc%*%aff1
+invAffReg<-invertAffine(affReg)
+invAffTim<-inverseAffine(affTim)
+
+reg3<-applyTransform(invAffReg,x = reg1)                  
+var(reg3-source)
+reg4<-applyAffine(source = reg2,aff = invAffTim)
+var(reg4-source)
+###############################
+# source---> target(rigid)  ###
+###############################
+source <- readNifti(system.file("extdata", "epi_t2.nii.gz",package="RNiftyReg"))
+target <- readNifti(system.file("extdata", "flash_t1.nii.gz",package="RNiftyReg"))
 
 
-system.time(reg1<-applyAffine(test,aff1,outDim = dim(test)*2))
-system.time(reg2<-applyTransform(transform = aff2,x = test,internal = NA))
-dim(reg1)
-dim(reg2)
-l<-list()
-l[[1]]<-(1:d[1])+trans/2
-l[[2]]<-(1:d[2])-trans/2
-l[[3]]<-(1:d[3])-trans/2
- system.time(reg3<-resample(test,points = l,kernel = mnKernel(1,0)))
-# 
- viewNew(reg1-reg2[,,])
-#  microbenchmark::microbenchmark(applyTransform(transform = aff2,x = test),applyAffine(test,aff1),unit = "relative")
-#  microbenchmark::microbenchmark(resample(test,points = l,kernel = mnKernel(1,0)))
- 
+translation =c(6.4,-3.1,9.34)
+angles = c(-.01,.3,.1)
+skews = c(0,0,0)
+scales = c(1,1,1)
 
-# viewR(reg1)
-# viewR(reg2)
-mean((reg1-reg2)^2)
 
-viewNew(reg1[,,]-reg3)
+affReg<-buildAffine(source = source,
+                    translation =translation,
+                    angles = angles,
+                    skews = skews,
+                    scales = scales,target = target)
 
-d1<-do.call("cbind",getImageDerivatives(reg1,rotation = FALSE))
-d2<-do.call("cbind",getImageDerivatives(reg2,rotation = FALSE))
-dtest<-do.call("cbind",getImageDerivatives(test,rotation = FALSE))
-var(dtest[!kmeansMask(test),])
-var(d2[!kmeansMask(test),])
-var(d1[!kmeansMask(test),])
+affTim<-createAffine(source = source,
+                     translation =translation,
+                     angles = angles,
+                     skews = skews,
+                     scales = scales,target=target)
+
+reg1<-applyTransform(affReg,x = source)
+reg2<-applyAffine(source=source,aff = affTim)
+sd(reg1-reg2)
+
+invAffReg<-invertAffine(affReg)
+invAffTim<-inverseAffine(affTim)
+
+reg3<-applyTransform(invAffReg,x = reg1)                  
+var(reg3-source)
+reg4<-applyAffine(source = reg2,aff = invAffTim)
+var(reg4-source)
+###############################
+# source---> target(affine) ###
+###############################
+source <- readNifti(system.file("extdata", "epi_t2.nii.gz",package="RNiftyReg"))
+target <- readNifti(system.file("extdata", "flash_t1.nii.gz",package="RNiftyReg"))
+
+
+translation =c(6.4,-3.1,9.34)
+angles = c(-.01,.3,.1)
+skews = c(.1,.03,-.2)
+scales = c(1.13,1.12,1.17)
+
+
+affReg<-buildAffine(source = source,
+                    translation =translation,
+                    angles = angles,
+                    skews = skews,
+                    scales = scales,target = target)
+
+affTim<-createAffine(source = source,
+                     translation =translation,
+                     angles = angles,
+                     skews = skews,
+                     scales = scales,target=target)
+
+reg1<-applyTransform(affReg,x = source)
+reg2<-applyAffine(source=source,aff = affTim)
+sd(reg1-reg2)
+
+invAffReg<-invertAffine(affReg)
+invAffTim<-inverseAffine(affTim)
+
+reg3<-applyTransform(invAffReg,x = reg1)                  
+var(reg3-source)
+reg4<-applyAffine(source = reg2,aff = invAffTim)
+var(reg4-source)
+
+
+
+###############################
+##### DECOMPOSITION ###########
+###############################
+
+
+
+invAff<-affTim
+trans<-invAff[1:3,4]
+subAff<-invAff[1:3,1:3]
+decomp<-chol(crossprod(subAff))
+scales<-diag(diag(decomp))
+skew<-decomp%*%solve(scales)
+rotation<-subAff%*%solve(decomp)
+
