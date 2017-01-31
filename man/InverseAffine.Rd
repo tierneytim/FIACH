@@ -19,6 +19,7 @@ A 4x4 affine matrix representing the  transformation. The transform is from sour
 }
 
 \examples{
+file<-system.file("extdata","mni.nii.gz",package="FIACH")
 source <- readNii(file)
 
 translation =c(6.4,-3.1,9.34)

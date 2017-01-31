@@ -20,6 +20,7 @@ A numeric array containing the transformed image is returned
 }
 
 \examples{
+file<-system.file("extdata","mni.nii.gz",package="FIACH")
 source <- readNii(file)
 
 translation =c(6.4,-3.1,9.34)
