@@ -25,18 +25,8 @@ viewNew<-function(data=NULL){
   
   if(Meta$magic==""&& class(data)=="character"){
     o<-getAnalyzeOrigin(data)
-  .qformFix(func,origin=o)
+    .qformFix(func,origin=o)
   }
-  
-  ##################################
-  ######## ASPECT RATIO ############
-  ##################################
-  
-  # pixel dimensions needed to get aspect ratio right
-  pix<-abs(RNiftyReg::pixdim(func)[1:3])
-  # vector containing the aspect ratios for each image
-  asp<-c(pix[2]/pix[3],pix[1]/pix[3],pix[1]/pix[2])
-  
   # make all image 4d as it is then easier to handle truly 4d images without writing new code
   d<-dim(func)
   if(length(d)==3){
@@ -44,8 +34,122 @@ viewNew<-function(data=NULL){
     #dim(olay)<-c(dim(olay),1)
   }
   d<-dim(func)
-  # get xorm for transforming to world coordinates
-  xf<-RNiftyReg::xform(func)
+  xf<-RNifti::xform(func)
+  ##################################
+  ######## ASPECT RATIO ############
+  ##################################
+  # function designed to approximate a real number with a rational number
+  ratApprox<-function(asp,maxRat = 10){
+    zooms<-round(asp*1:maxRat)
+    subsamps<-1:maxRat
+    subsamp<-which.min(abs(zooms/subsamps-asp))
+    zoom<-zooms[subsamp]
+    return(c(zoom,subsamp))
+  }
+  
+  # pixel dimensions needed to get aspect ratio right
+  pix<-abs(RNifti::pixdim(func)[1:3])
+  
+  # vector containing the aspect ratios for each image
+  asp<-c(pix[1]/pix[3],pix[2]/pix[3],pix[1]/pix[2])
+  
+  # code that determines how the aspect ratio is handled
+  code<-paste(as.character(as.numeric(asp>=1)),collapse="")
+  zoom<-1
+  subsamp<-1
+  
+  rat1<-sort(ratApprox(asp[1]),decreasing = TRUE)
+  rat2<-sort(ratApprox(asp[2]),decreasing = TRUE)
+  rat3<-sort(ratApprox(asp[3]),decreasing = TRUE)
+  
+  ##################################
+  ######## ASPECT RATIO: LEFT ######
+  ##################################
+  if(code == "001"||code=="101"){
+    zoom2<-paste(zoom*rat3[1],zoom*rat2[1])
+    subsamp2<-paste(subsamp*rat3[2],-subsamp*rat2[2])
+    wy<-round(d[1]*zoom/subsamp*asp[3])
+    hy<-round(d[3]*zoom/subsamp/asp[2])
+  }else{
+    if(asp[1]>1){
+      zoom2<-paste(zoom*rat1[1],zoom)
+      subsamp2<-paste(subsamp*rat1[2],-subsamp)
+      wy<-round(d[1]*zoom/subsamp*asp[1]) 
+      hy<-round(d[3]*zoom/subsamp) 
+    }else{
+      zoom2<-paste(zoom,zoom*rat1[1])
+      subsamp2<-paste(subsamp,-subsamp*rat1[2])
+      wy<-round(d[1]*zoom/subsamp) 
+      hy<-round(d[3]*zoom/subsamp/asp[1]) 
+    }
+  }
+  
+  ##################################
+  ##### ASPECT RATIO: BOTTOM #######
+  ##################################
+  if(code == "111"||code == "110"){
+    zoom3<-paste(zoom*rat1[1],zoom*rat2[1])
+    subsamp3<-paste(subsamp*rat1[2],-subsamp*rat2[2])
+    wz<-round(d[1]*zoom/subsamp*asp[1])# equals wx:correct
+    hz<-round(d[2]*zoom/subsamp*asp[2])# equals wx:correct
+  }else{
+    if(asp[3]>1){
+      zoom3<-paste(zoom*rat3[1],zoom)
+      subsamp3<-paste(subsamp*rat3[2],-subsamp)
+      wz<-round(d[1]*zoom/subsamp*asp[3])# equals wx:correct
+      hz<-round(d[2]*zoom/subsamp)# equals wx:correct
+    }else{
+      zoom3<-paste(zoom,zoom*rat3[1])
+      subsamp3<-paste(subsamp,-subsamp*rat3[2])
+      wz<-round(d[1]*zoom/subsamp)# equals wx:correct
+      hz<-round(d[2]*zoom/subsamp/asp[3])# equals wx:correct
+    }
+  }
+  ##################################
+  ######## ASPECT RATIO: RIGHT #####
+  ##################################
+  if(code=="000"){
+    zoom1<-paste(zoom*rat3[1],zoom*rat1[1])
+    subsamp1<-paste(subsamp*rat3[2],-subsamp*rat1[2])
+    wx<-round(d[2]*zoom/subsamp/asp[3]) # equals wy:correct
+    hx<-round(d[3]*zoom/subsamp/asp[1]) # equals wx:correct  
+  }else{
+    if(code=="010"){
+      zoom1<-paste(zoom*rat3[1],zoom*rat1[1])
+      subsamp1<-paste(subsamp*rat3[2],-subsamp*rat1[2])
+      wx<-round(d[2]*zoom/subsamp/asp[3]) # equals wy:correct
+      hx<-round(d[3]*zoom/subsamp/asp[1]) # equals wx:c
+    }else{
+      if(asp[2]>=1){ # X expands
+        zoom1<-paste(zoom*rat2[1],zoom)
+        subsamp1<-paste(subsamp*rat2[2],-subsamp)
+        wx<-round(d[2]*zoom/subsamp*asp[2]) # equals wy:correct
+        hx<-round(d[3]*zoom/subsamp) # equals wx:correct
+      }else{ # y expands
+        zoom1<-paste(zoom,zoom*rat2[1])
+        subsamp1<-paste(subsamp,-subsamp*rat2[2])
+        wx<-round(d[2]*zoom/subsamp) # equals wy:correct
+        hx<-round(d[3]*zoom/subsamp/asp[2]) # equals wx:correct
+      }
+      
+    }
+  }
+  ##################################
+  #### EXPANSION FACTOR ############
+  ##################################
+  imHeight<-hy+hz
+  screenHeight<-as.numeric(strsplit(tclvalue(tkwm.maxsize("."))," ")[[1]])[2]
+  desHeight<-round(screenHeight/2)
+  zoom<-pmax(floor(desHeight/imHeight),1)
+  zoom3<-paste(as.numeric(strsplit(zoom3," ")[[1]])*zoom,collapse = " ")
+  zoom2<-paste(as.numeric(strsplit(zoom2," ")[[1]])*zoom,collapse = " ")
+  zoom1<-paste(as.numeric(strsplit(zoom1," ")[[1]])*zoom,collapse = " ")
+  hx<-hx*zoom
+  wx<-wx*zoom
+  hy<-hy*zoom
+  wy<-wy*zoom
+  hz<-hz*zoom
+  wz<-wz*zoom
   ##################################
   ########## FRAMES ################
   ##################################
@@ -67,7 +171,6 @@ viewNew<-function(data=NULL){
   # initial coordinate is middle of image
   xyz<-round(c(d[1]/2,d[2]/2,d[3]/2))
   # image expands to 256 pixels or if naturally larger stays as is
-  zoom<-pmax(floor(256/max(d[1:3])),1)
   
   #empty vectors to hold crosshair poistion and length
   xyzL<-xyz
@@ -75,8 +178,7 @@ viewNew<-function(data=NULL){
   
   # time variable initialised to 1
   t<-1
-  # no subsampling  of image takes place
-  subsamp<-1
+  
   # by default crosshairs are on
   crosshairsOn<-TRUE
   
@@ -104,7 +206,7 @@ viewNew<-function(data=NULL){
   click3<-FALSE
   
   # set initial world coordinates and hold them in tcl variables
-  worldInit<-round(RNiftyReg::voxelToWorld(xyz,func))
+  worldInit<-round(RNifti::voxelToWorld(xyz,func))
   Xw<-tclVar(worldInit[1])
   Yw<-tclVar(worldInit[2])
   Zw<-tclVar(worldInit[3])
@@ -141,15 +243,6 @@ viewNew<-function(data=NULL){
   ##################################
   ####### FUNCTIONS ################
   ##################################
-  # function designed to approximate a real number with a rational number
-  ratApprox<-function(asp,maxRat = 10){
-    zooms<-round(asp*1:maxRat)
-    subsamps<-1:maxRat
-    subsamp<-which.min(abs(zooms/subsamps-asp))
-    zoom<-zooms[subsamp]
-    return(c(zoom,subsamp))
-  }
-  
   # prepares images to be displayed if clicked
   onLeftClick1<-function(x,y){
     
@@ -167,8 +260,6 @@ viewNew<-function(data=NULL){
     click1<<-FALSE
     
   }
-  
-  # prepares images to be displayed if clicked
   onLeftClick2<-function(x,y){
     
     coord <- as.numeric(c(x,y))
@@ -184,8 +275,6 @@ viewNew<-function(data=NULL){
     reslicer(xyz,zoom,subsamp)
     click2<<-FALSE
   }
-  
-  # prepares images to be displayed if clicked
   onLeftClick3<-function(x,y){
     coord<-as.numeric(c(x,y))
     height<-as.character(tkwinfo("reqheight",f3))
@@ -238,24 +327,12 @@ viewNew<-function(data=NULL){
     reslicer(coNew = xyz,zoom = zoom,subsamp = subsamp)
   }
   
-  # redisplays image with overlay max and min changed
-  # omaxminChange<-function(){
-  #   ma<-as.numeric(tclvalue(ohigh))
-  #   mi<-as.numeric(tclvalue(olow))
-  #   if(is.na(ma)){tclvalue(ohigh)<<-or[2];ma<-or[2]}
-  #   if(is.na(mi)){tclvalue(olow)<<-or[1];mi<-or[1]}
-  #   maxminChange()
-  #   olay[olay>ma]<-ma
-  #   check<-olay>mi
-  #   olay[olay<mi]<-mi
-  #   scfunc<-scaleRGB(olay,max = ma,min = mi)
-  #   RGBarr[check]<<-hextest(input = olay,palette = hotMetal(256),currentmax = ma,currentmin = mi)[check]
-  #   
-  #   reslicer(coNew = xyz,zoom = zoom,subsamp = subsamp)
-  # }
-  
   # adds the spinbox widget which can be mysteriously absent...
-  tkspinbox <- function(parent, ...) {tkwidget(parent, "tk::spinbox", ...)}
+  tkspinbox <- function(parent, ...) {
+    tkwidget(parent, "tk::spinbox", ...)
+  }
+  
+  # animation functions for time variable
   repeat_call<-function(ms = 200 , f) {
     after_ID <<- tcl( "after" , ms,function(){ 
       if(someFlag){
@@ -288,30 +365,18 @@ viewNew<-function(data=NULL){
   rhy<-paste("rh",paste(ylabel,collapse = ""),sep = "")
   rhz<-paste("rh",paste(zlabel,collapse = ""),sep = "")
   
-  # Create the base x,y and z photo images
-  #.Tcl("image create photo hmmx")
-  # .Tcl("image create photo hmmy")
-  # .Tcl("image create photo hmmz")
   .Tcl(paste("image create photo",hmmx))
   .Tcl(paste("image create photo",hmmy))
   .Tcl(paste("image create photo",hmmz))
   
-  # Create the intermediary x,y and z photo images
-  # .Tcl("image create photo shmmx")
-  # .Tcl("image create photo shmmy")
-  # .Tcl("image create photo shmmz")
   .Tcl(paste("image create photo",shx))
   .Tcl(paste("image create photo",shy))
   .Tcl(paste("image create photo",shz))
-                 
-  # Create the final x,y and z photo images
-  # xImageCallback<-.Tcl("image create photo rhmmx")
-  # yImageCallback<-.Tcl("image create photo rhmmy")
-  # zImageCallback<-.Tcl("image create photo rhmmz")
+  
   xImageCallback<-.Tcl(paste("image create photo",rhx))
   yImageCallback<-.Tcl(paste("image create photo",rhy))
   zImageCallback<-.Tcl(paste("image create photo",rhz))
-                       
+  
   
   # attach the final images to a tk widget so they can be displayed
   lx <- tklabel(f1, image = rhx)
@@ -358,35 +423,7 @@ viewNew<-function(data=NULL){
     if(is.na(ma)){tclvalue(high)<<-r[2];ma<-r[2]}
     if(is.na(mi)){tclvalue(low)<<-r[1];mi<-r[1]}
     
-    
-    # get rational approximation for aspect ratio
-    indAsp<-which(asp<1)
-    asp[indAsp]<-1/asp[indAsp]
-    aspAdj1<-ratApprox(asp[1])
-    rat1<-ratApprox(asp[1])
-    rat2<-ratApprox(asp[2])
-    rat3<-ratApprox(asp[3])
-    
-    # caclualte height and widths of images in pixels
-    zoom<<-zoom
-    subsamp<<-subsamp
-    zoom1<-paste(zoom,zoom*rat1[1])
-    zoom2<-paste(zoom,zoom*rat2[1])
-    zoom3<-paste(zoom,zoom*rat3[1])
-    subsamp1<-paste(subsamp,-subsamp*rat1[2])
-    subsamp2<-paste(subsamp,-subsamp*rat2[2])
-    subsamp3<-paste(subsamp,-subsamp*rat3[2])
-    wz<-round(d[1]*zoom/subsamp)
-    hz<-round(d[2]*zoom/subsamp*rat3[1]/rat3[2])
-    wy<-round(d[1]*zoom/subsamp)
-    hy<-round(d[3]*zoom/subsamp*rat2[1]/rat2[2])
-    wx<-round(d[2]*zoom/subsamp)
-    hx<-round(d[3]*zoom/subsamp*rat1[1]/rat1[2])
-    
     # set height and width  of images
-    # .Tcl(paste("rhmmz configure -width",wz,"-height",hz)) #1/2
-    # .Tcl(paste("rhmmy configure -width",wy,"-height",hy))#1/2
-    # .Tcl(paste("rhmmx configure -width",wx,"-height",hx))#1/2
     .Tcl(paste( rhz, "configure -width",wz,"-height",hz))#1/2
     .Tcl(paste( rhy, "configure -width",wy,"-height",hy))#1/2
     .Tcl(paste( rhx, "configure -width",wx,"-height",hx))#1/2
@@ -396,7 +433,7 @@ viewNew<-function(data=NULL){
     
     # get the intensity at crosshair location
     tclvalue(intens)<<-round(locFunc[xyz[1],xyz[2],xyz[3],t],digits = 3)
-
+    
     if(!click3){
       # in place modification of im3   
       .hextest(input = locFunc[,,xyz[3],t],palette = palette,currentmax = ma,currentmin = mi,out = im3)
@@ -414,8 +451,7 @@ viewNew<-function(data=NULL){
       zPutCallback<<-.Tcl.objv(tclArgZ)
       
       # zoom by the factor zoom 3
-      #.Tcl(paste("shmmz copy hmmz -zoom",zoom3))
-       .Tcl(paste(shz,"copy",hmmz, "-zoom",zoom3))
+      .Tcl(paste(shz,"copy",hmmz, "-zoom",zoom3))
     }
     if(!click2){
       # same as previous but for different image 
@@ -425,7 +461,6 @@ viewNew<-function(data=NULL){
       cmdy<<-paste("{",p2," }",sep = "")
       .tclObject( tclArgY[[3]],update = cmdy)
       yPutCallback<<-.Tcl.objv(tclArgY)
-      #.Tcl(paste("shmmy copy hmmy -zoom",zoom2))
       .Tcl(paste(shy,"copy", hmmy,"-zoom",zoom2))
     }
     if(!click1){
@@ -436,37 +471,30 @@ viewNew<-function(data=NULL){
       cmdx<<-paste("{",p1," }",sep = "")
       .tclObject( tclArgX[[3]],update = cmdx)
       xPutCallback<<-.Tcl.objv(tclArgX)
-      #.Tcl(paste("shmmx copy hmmx -zoom",zoom1))
-      #.Tcl(paste("rhmmx copy shmmx  -subsample",subsamp1))
       .Tcl(paste(shx,"copy", hmmx,"-zoom",zoom1))
     }
     
-    #final image is  the subsampled  version of the zoomed image 
-    # .Tcl(paste("rhmmz copy shmmz -subsample",subsamp3))
-    # .Tcl(paste("rhmmy copy shmmy -subsample",subsamp2))
-    # .Tcl(paste("rhmmx copy shmmx -subsample",subsamp1))
     .Tcl(paste(rhz,"copy", shz, "-subsample",subsamp3))
     .Tcl(paste(rhy,"copy", shy, "-subsample",subsamp2))
     .Tcl(paste(rhx,"copy", shx, "-subsample",subsamp1))
     
     # places green line at coordinate
-     if(crosshairsOn){
+    if(crosshairsOn){
       cmd<-paste(rhx,"put  #00FF00 -to",xyzLineLength[2]-xyzL[2],0,xyzLineLength[2]-xyzL[2]+1,xyzLineLength[3])
       .Tcl(cmd)
       cmd<-paste(rhx, "put  #00FF00 -to",0,xyzL[3],xyzLineLength[2],xyzL[3]+1)
       .Tcl(cmd)
-
+      
       cmd<-paste(rhz,"put  #00FF00 -to",0,xyzL[2],xyzLineLength[1],xyzL[2]-1)
       .Tcl(cmd)
       cmd<-paste(rhz,"put  #00FF00 -to",xyzL[1],0,xyzL[1]+1,xyzLineLength[2])
       .Tcl(cmd)
-
+      
       cmd<-paste(rhy,"put  #00FF00 -to",0,xyzL[3],xyzLineLength[2],xyzL[3]+1)
       .Tcl(cmd)
       cmd<-paste(rhy,"put  #00FF00 -to",xyzL[1],0,xyzL[1]+1,xyzLineLength[3])
       .Tcl(cmd)}
-    # 
-    # 
+    
     # update green line lengths and size of bottom frame(potential for resizing)
     xyzLineLength[1]<<-as.numeric(tkwinfo("reqwidth",f3))
     xyzLineLength[2]<<-as.numeric(tkwinfo("reqheight",f3))
@@ -480,11 +508,11 @@ viewNew<-function(data=NULL){
       cw<-as.numeric(tkwinfo("reqwidth",canvas))
       xfac<-cw/max(x)
       xnew<-x*xfac
-   
+      
       if(sum(y)!=0){
-      yfac<-ch*.8/diff(range(y))
-      ynew<-ch-((y-min(y))*yfac+ch*.1)
-      py<-ch-((y[t]-min(y))*yfac+ch*.1)
+        yfac<-ch*.8/diff(range(y))
+        ynew<-ch-((y-min(y))*yfac+ch*.1)
+        py<-ch-((y[t]-min(y))*yfac+ch*.1)
       }else{
         ynew<-rep(ch/2,length(y))
         py<-ch/2
@@ -492,7 +520,7 @@ viewNew<-function(data=NULL){
       s<-round(c(rbind(xnew,ynew)))
       .Tcl(paste(canvas$ID,"delete all"))
       .Tcl(paste(canvas$ID,"create line" ,paste(s,collapse=" "), '-fill grey -tags "myline"'))
-       px<-(t-1)*xfac
+      px<-(t-1)*xfac
       .Tcl(paste(canvas$ID,"create oval" ,
                  paste(px-3,py-3,px+3,py+3,
                        collapse=" "), '-outline #00ff00 -tags "mypoint"'))
@@ -541,12 +569,6 @@ viewNew<-function(data=NULL){
   
   # movie button
   tmovieBut<-tkcheckbutton(f5,variable=tmovie, command=movieT,text="Movie",font=myfont)
-  
-  #oLab<-tklabel(parent=f5,text="Overlay")
-  #oMAX<-tkentry(f5,textvariable=ohigh)
-  #oMIN<-tkentry(f5,textvariable=olow)
-  #ointensity<-tkentry(f5,textvariable=ointens,state="readonly",readonlybackground="white")
-  
   ##################################
   ######### GEOMETRY ###############
   ##################################
@@ -557,22 +579,14 @@ viewNew<-function(data=NULL){
   tkgrid(lx)
   tkgrid(ly)
   tkgrid(lz)
-  # canvas <- tkcanvas(f4, relief="raised",background="black",
-  #                    width=as.numeric(.Tcl("image width rhmmy")),
-  #                    height=as.numeric(.Tcl("image height rhmmz")))
   canvas <- tkcanvas(f4, relief="raised",background="black",
                      width=as.numeric(.Tcl(paste("image width" ,rhy))),
                      height=as.numeric(.Tcl(paste("image width" ,rhz))))
-  #paste("rh",paste(zlabel,collapse = ""))
   tkgrid(canvas)
   reslicer(coNew = xyz,zoom = zoom,subsamp = subsamp)
   crossHairs()
   crossHairs()
   if(d[4]>1){
-    # tkconfigure(canvas,
-    #             height=as.numeric(.Tcl("image height rhmmz")),
-    #             width=as.numeric(.Tcl("image width rhmmy"))
-    # )
     tkconfigure(canvas,
                 height=as.numeric(.Tcl(paste("image width" ,rhz))),
                 width=as.numeric(.Tcl(paste("image width" ,rhy)))
@@ -607,8 +621,6 @@ viewNew<-function(data=NULL){
   tkplace(maxLab,'in'=MAX,x=-1,rely=.5,anchor="e",height=boxHeight)
   tkplace(minLab,'in'=MIN,x=-1,rely=.5,anchor="e",height=boxHeight)
   tkplace(baseLab,"in"=intensity,x=-4,y=-as.numeric(tkwinfo("reqheight",intensity))*.5,anchor="w",height=boxHeight)
-  
-  #tkplace(oLab,"in"=ointensity,x=-9,y=-as.numeric(tkwinfo("reqheight",ointensity))*.5,anchor="w",height=boxHeight)
   ###################################
   ########## BINDINGS ###############
   ###################################
@@ -627,12 +639,9 @@ viewNew<-function(data=NULL){
   if(dim(func)[4]>1){tkbind(coT, "<Return>",onSpin)}
   tkbind(MAX, "<Return>",maxminChange)
   tkbind(MIN, "<Return>",maxminChange)
-  #tkbind(oMAX, "<Return>",omaxminChange)
-  #tkbind(oMIN, "<Return>",omaxminChange)
   ##################################
   ########## CONFIGURES ############
   ##################################
-  
   # get crosshair to appear
   tkconfigure(img,cursor="crosshair")
   
@@ -643,7 +652,7 @@ viewNew<-function(data=NULL){
   #do not make window resizable
   tkwm.resizable(top,FALSE,FALSE)
   if(Meta$magic==""){
-  tcltk::tkmessageBox(parent=top,message = "Warning: This image appears to be an Analyze image.\nThis format is only partially supported. Orientation\n may be incorrect.", 
-                                            icon = "warning", type = "ok")
+    tcltk::tkmessageBox(parent=top,message = "Warning: This image appears to be an Analyze image.\nThis format is only partially supported. Orientation\n may be incorrect.", 
+                        icon = "warning", type = "ok")
   }
 }
