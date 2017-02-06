@@ -1,8 +1,8 @@
 getDatatype<-function(input,type="RNiftyReg"){
   if(mode(input)=="list"||mode(input)=="character"){
-    outype<-max(unlist(lapply(input,function(x){RNiftyReg::dumpNifti(x)$datatype})))
+    outype<-max(unlist(lapply(input,function(x){RNifti::dumpNifti(x)$datatype})))
   }else{
-    outype<-RNiftyReg::dumpNifti(image = input)$datatype
+    outype<-RNifti::dumpNifti(image = input)$datatype
     
   }
   if(type=="RNiftyReg"){

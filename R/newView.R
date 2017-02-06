@@ -20,8 +20,8 @@ viewNew<-function(data=NULL){
     stop(paste("class: ",cl," is not supported.\n niftiImage, arrays, characters and nifti(experimental) classes are supported.\n A NULL argument for data is also supported "))
   }
   #olay<-readNifti(file)
-  Meta<-RNiftyReg::dumpNifti(func)
-  func<-RNiftyReg::updateNifti(zeroNa(func),template = Meta)
+  Meta<-RNifti::dumpNifti(func)
+  func<-RNifti::updateNifti(zeroNa(func),template = Meta)
   
   if(Meta$magic==""&& class(data)=="character"){
     o<-getAnalyzeOrigin(data)
@@ -652,7 +652,7 @@ viewNew<-function(data=NULL){
   #do not make window resizable
   tkwm.resizable(top,FALSE,FALSE)
   if(Meta$magic==""){
-    tcltk::tkmessageBox(parent=top,message = "Warning: This image appears to be an Analyze image.\nThis format is only partially supported. Orientation\n may be incorrect.", 
+    tkmessageBox(parent=top,message = "Warning: This image appears to be an Analyze image.\nThis format is only partially supported. Orientation\n may be incorrect.", 
                         icon = "warning", type = "ok")
   }
 }

@@ -9,6 +9,6 @@ fiachSplit<-function(input){
   num<-formatC(1:t, width = nchar(as.character(t)), format = "d", flag = "0")
   outnames<-paste(dir,"/",basNoExt,"_",num,sep = "")
   for(i in 1:t){
-    RNiftyReg::writeNifti(image = data[[i]],datatype = outCode,file = outnames[i])
+    RNifti::writeNifti(image = data[[i]],datatype = outCode,file = outnames[i])
   }
 }

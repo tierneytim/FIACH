@@ -1,7 +1,7 @@
 getAnalyzeOrigin<-function(fname){
   
   # check if the image is actually an analyze file
-  hdr<-RNiftyReg::dumpNifti(fname)
+  hdr<-RNifti::dumpNifti(fname)
   if(hdr$magic!=""){stop("This file does not appear to be an Analyze file")}
   
   # work out if the file is the header or the image

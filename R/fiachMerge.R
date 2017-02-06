@@ -11,5 +11,5 @@ fiachMerge<-function(input,compress=TRUE){
     outname<-paste(dir,"/","4D_",basNoExt,sep = "")
   }
   
-  RNiftyReg::writeNifti(image = data,file = outname,datatype = outCode)
+  RNifti::writeNifti(image = data,file = outname,datatype = outCode)
 }
