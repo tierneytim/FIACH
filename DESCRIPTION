@@ -9,8 +9,7 @@ Repository: CRAN
 Description: Useful functions for fMRI preprocessing.
 License: GPL-2
 Depends: R (>= 3.2.0)
-Imports: Rcpp (>= 0.11.4), RNiftyReg (>= 2.0.0), utils,
-        stats, graphics, grDevices, tcltk, RNifti
+Imports: Rcpp (>= 0.11.4), utils, RNifti (>= 0.3.0), stats, graphics, grDevices, tcltk
 Suggests: testthat
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
