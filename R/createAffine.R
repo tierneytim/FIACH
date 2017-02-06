@@ -17,7 +17,7 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
   }
   
   sourceClass<-class(source)
-  targetClass<-class(source)
+  targetClass<-class(target)
   
   if(sourceClass!="niftiImage"  && sourceClass!="array"){
     stop(paste("class: ",sourceClass," is not supported.\n niftiImage and arrays are supported "))
@@ -31,18 +31,25 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
   
   
   
-  sourceXform<-xform(source)
+  sourceXform<-RNifti::xform(source)
   sourceDim<-dim(source)
+  sourceHdr<-RNifti::dumpNifti(source)
+  sourcePixdim<-RNifti::pixdim(source)
   
   if(is.null(target)){
+
     targetXform<-sourceXform
     targetDim<-floor(scales*dim(source))
+    targetPixdim<-sourcePixdim/scales
+    
     scaleMat<-diag(scales)
     targetXform[1:3,1:3]<-solve(scaleMat)%*%targetXform[1:3,1:3]
     scales<-c(1,1,1)
+    
   }else{
-    targetXform<-xform(target)
+    targetXform<-RNifti::xform(target)
     targetDim<-dim(target)
+    targetPixdim<-pixdim(target)
   }
   affine <- diag(4)
   
@@ -60,6 +67,8 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
   attr(affine,"targetXform")<-targetXform
   attr(affine,"sourceDim")<-sourceDim
   attr(affine,"targetDim")<-targetDim
-  class(affine)<-"FIACH Affine"
+  attr(affine,"sourcePixdim")<-sourcePixdim
+  attr(affine,"targetPixdim")<-targetPixdim
+  class(affine)<-"FIACHAffine"
   return(affine)
 } 

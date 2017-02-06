@@ -65,7 +65,7 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   }
   
   # dimension checks( equality and 4d files currently not allowed: i hope to fix this if i can access sub-bricks in RNifti )
-  hdims <- lapply(files, function(x) {dumpNifti(x)$dim})
+  hdims <- lapply(files, function(x) {RNifti::dumpNifti(x)$dim})
   dims <- do.call("rbind", hdims)
   if (any(dims[, 5] > 1)) {
     stop("Currently this function does not support  4D files")
@@ -88,13 +88,13 @@ realign<-function(files,quality=.9,write=TRUE,plotConvergence=FALSE){
   ##########################
   print("Assuming target image is first image")
   
-  targ<-RNiftyReg::readNifti(files[1])
+  targ<-RNifti::readNifti(files[1])
   
   # check for analyze format
-  anlz<-dumpNifti(files[1])$magic==""
+  anlz<-RNifti::dumpNifti(files[1])$magic==""
   
   #get the pixel dimensions
-  pix<-pixdim(targ)[1:3]
+  pix<-RNifti::pixdim(targ)[1:3]
   
   # if the image is analyze then try and find and origin and set an appropriate qform and signal warning.
   if(anlz){
