@@ -2,7 +2,7 @@ readNii <-function(input,fourD=TRUE){
   ################################
   ######## READ ##################
   ################################
-  init<-RNiftyReg::readNifti(input)
+  init<-RNifti::readNifti(input)
   ##fourD TRUE,file 3d############
   
   if(length(input)>1){
@@ -20,7 +20,7 @@ readNii <-function(input,fourD=TRUE){
       d<-c(dimMat[1,1:3],time)
       out1<-c(init,recursive=TRUE)
       if(storage.mode(out1)=="integer"){out1<-.icombine(out1,d)}else{out1<-.dcombine(out1,d)}
-      out<-RNiftyReg::updateNifti(image = out1,init[[1]])
+      out<-RNifti::updateNifti(image = out1,init[[1]])
     }else{out<-init}
   }
   
@@ -28,8 +28,8 @@ readNii <-function(input,fourD=TRUE){
         d<-dim(init)
         if(fourD==FALSE && length(d)==4){
         out<-vector(mode = "list",d[4])
-        temp<-RNiftyReg::updateNifti(image = init[,,,1],template = init)
-        out<-lapply(1:d[4], function(x) RNiftyReg::updateNifti(init[ , , ,x],temp))
+        temp<-RNifti::updateNifti(image = init[,,,1],template = init)
+        out<-lapply(1:d[4], function(x) RNifti::updateNifti(init[ , , ,x],temp))
         }else{out<-init}
         
         }

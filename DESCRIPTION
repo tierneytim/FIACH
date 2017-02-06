@@ -10,8 +10,8 @@ Description: Useful functions for fMRI preprocessing.
 License: GPL-2
 Depends: R (>= 3.2.0)
 Imports: Rcpp (>= 0.11.4), RNiftyReg (>= 2.0.0), utils,
-        stats, graphics, grDevices, tcltk
-Suggests: tkrplot
+        stats, graphics, grDevices, tcltk, RNifti
+Suggests: testthat
 LinkingTo: Rcpp, RcppArmadillo
 NeedsCompilation: yes
 Packaged: 2016-4-03 18:07:37 UTC; Nerevar

@@ -1,0 +1,15 @@
+context("Temporal Signal Processing")
+
+test_that("Temporal Signal  Processing functions gives correct answers", {
+#convolve1d() 
+#fftN()  
+#hampel()
+#highBasis()
+#highPass()
+#KaiserWin()
+#LowBasis()
+#badData()
+#naSpline()
+#rawPeriodogram()
+#sinc()
+})

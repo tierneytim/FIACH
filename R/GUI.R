@@ -1,6 +1,6 @@
 GUI<-function(){
   disp<-function(){
-    viewR()
+    viewNew()
   }
   fiachGUI<-function(){
     base<-tktoplevel()

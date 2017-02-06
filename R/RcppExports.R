@@ -128,6 +128,30 @@ erode <- function(input, k) {
   if(is.vector(input)){input<-as.matrix(input)}
   .Call('FIACH_erode', PACKAGE = 'FIACH', input, k)
 }
+applyAffine <- function(source, aff,update=FALSE) {
+  sourceClass<-class(source)
+  if(sourceClass!="niftiImage"  && sourceClass!="array"){
+    stop(paste("class: ",sourceClass," is not supported.\n niftiImage and arrays are supported "))
+  }
+  
+  affineClass<-class(aff)
+  if(affineClass!="FIACHAffine"){
+    stop(paste("class: ",affineClass," is not supported.\n objects of class FIACHAffine are supported "))
+  }
+  
+  tx<-attr(aff,"targetXform")
+  sx<-attr(aff,"sourceXform")
+  voxAffine<-solve(tx)%*%aff%*%sx
+  outDim<-attr(aff,"targetDim")
+  reg<-.Call('FIACH_applyAffine', PACKAGE = 'FIACH', yr=source, aff=voxAffine,outDim=outDim)
+  
+  if(update){
+  RNifti::sform(reg)<-structure(tx,code=2L)
+  RNifti::qform(reg)<-structure(tx,code=2L)
+  pixdim(reg)<-attr(aff,"targetPixdim")
+  }
+  return(reg)
+}
 .icombine<-function(X,dim){
   .Call('FIACH_icombine', PACKAGE = 'FIACH', X, dim)
 }

@@ -113,7 +113,7 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   #####################################
   if(length(input)==1){four.d<-TRUE}else{four.d<-FALSE}
   data<-readNii(input)
-  temp<-RNiftyReg::updateNifti(data[,,,1],template = data)
+  temp<-RNifti::updateNifti(data[,,,1],template = data)
   outType<-getDatatype(input = input,type = "RNiftyReg")
   print("Data is Read") 
   #####################################
@@ -272,8 +272,8 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   ####################################
   if (four.d==FALSE){
     for(i in 1:length(input)){
-      out<-RNiftyReg::updateNifti(mov.arr[,,,i],template=temp)
-       RNiftyReg::writeNifti(out, file=output.file.name[i],datatype = outType)
+      out<-RNifti::updateNifti(mov.arr[,,,i],template=temp)
+       RNifti::writeNifti(out, file=output.file.name[i],datatype = outType)
     }
   }
   #####################################
@@ -311,13 +311,13 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   #####################################
   threeDim<-c(3,dim(data)[1:3],rep(1,4))
   if(four.d==TRUE){
-    out<-RNiftyReg::updateNifti(mov.arr,template = temp)
-    RNiftyReg::writeNifti(out, file=output.file.name,datatype = outType)
+    out<-RNifti::updateNifti(mov.arr,template = temp)
+    RNifti::writeNifti(out, file=output.file.name,datatype = outType)
     } 
   
-  RNiftyReg::writeNifti(mask.arr,paste(fold,"/mask",sep=""),template=temp,datatype ="char") 
-  RNiftyReg::writeNifti(robust.brain.tsnr.arr,paste(fold,"/rtsnr",sep=""), template=temp,datatype = "float")
-  RNiftyReg::writeNifti(brain.meds.arr,paste(fold,"/median",sep=""), template=temp,datatype = outType) 
+  RNifti::writeNifti(mask.arr,paste(fold,"/mask",sep=""),template=temp,datatype ="char") 
+  RNifti::writeNifti(robust.brain.tsnr.arr,paste(fold,"/rtsnr",sep=""), template=temp,datatype = "float")
+  RNifti::writeNifti(brain.meds.arr,paste(fold,"/median",sep=""), template=temp,datatype = outType) 
   #####################################
   #### MEMORY MANAGEMENT ##############
   #####################################
