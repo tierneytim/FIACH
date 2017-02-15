@@ -167,12 +167,13 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
               for(int i = 0; i<nout;i++){       // loop over requested points and...
                 arma::vec ip(4);
                 ip[3] = 1;                      //Homogenous coordinate 
-                ip[2] = i/outxy+1;                 // 
+                ip[2] = i/outxy;                 // 
                 int temp = i % outxy;
-                ip[1] = temp/outDim[0]+1;
-                ip[0] = (temp % outDim[0])+1;
+                ip[1] = temp/outDim[0];
+                ip[0] = (temp % outDim[0]);
                 
                 arma::vec p = sa * ip;
+                p+=1;
                 int indx = (int)p[0];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
                 int indy = (int)p[1];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
                 int indz = (int)p[2];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
