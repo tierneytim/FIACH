@@ -16,16 +16,19 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
   int z = arrayDims[2];
   //  int xy = x*y;                                   // needed for later when determining lcoation from pointer index
   arma::cube temp(yr.begin(),x,y,z,false,false);  // need arma cube as NumericVector doesn't allow 3d Access. e.g yr(i,j,k)
-  arma::cube coeffx = arma::zeros(x+2, y+2,z+2);  // Coefficient cube has n+2 elements in each dimension due to zeroth and nth +1 element
+  //arma::cube coeffx = arma::zeros(x+2, y+2,z+2);  // Coefficient cube has n+2 elements in each dimension due to zeroth and nth +1 element
+  arma::cube coeffx = arma::zeros(x+2, y+2,z+4);  // Coefficient cube has n+2 elements in each dimension due to zeroth and nth +1 element
   
+
   for(int k = 0;k<(z);k++){ 
     for(int j = 0;j<(y);j++){ 
       for(int i = 0;i<(x);i++){
-        coeffx.at(i+1,j+1,k+1) = temp.at(i,j,k);  // fill cube with zero padding for edge coefficients
+        coeffx.at(i+1,j+1,k+2) = temp.at(i,j,k);  // fill cube with zero padding for edge coefficients
       }
     }
   }
   
+
   //////////////////////////////////////////////////////
   ////// Spline Coefficient Calculation/////////////////                   
   //////////////////////////////////////////////////////
@@ -34,7 +37,8 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
   * difference equation applied in one direction followed by the reverse.
   * see Unser, M., Aldroubi, A, & Eden, M. (1993). B-Spline Signal-Processing .1. Theory. Ieee Transactions on Signal Processing. 
   * and Unser, M., Aldroubi, A., & Eden, M. (1991). Fast B-Spline Transforms for Continuous Image Representation and Interpolation. IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(3), 277–285. 
-  */ 
+  */
+  z+=2;
   Rcpp::NumericVector g1(x);
   Rcpp::NumericVector g2(y);
   Rcpp::NumericVector g3(z);
@@ -139,6 +143,8 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
             coeffx(arma::span(0,x+1),arma::span(0,y+1),arma::span(z+1,z+1)) 
               = 2*coeffx(arma::span(0,x+1),arma::span(0,y+1),arma::span(z,z))
               -coeffx(arma::span(0,x+1),arma::span(0,y+1),arma::span(z-1,z-1)); 
+              
+          
               //////////////////////////////////////////////////////
               //////            Spline interpolation           /////                   
               //////////////////////////////////////////////////////
@@ -178,8 +184,8 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
                 int indy = (int)p[1];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
                 int indz = (int)p[2];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
                 
-                
-                if(indx<1||p[0]>x||p[1]>y||indy<1||indz<1||p[2]>z){  // check range
+               // bool inRangeZ = indz>=1  && p[2]<=z;
+                if(indx<1||p[0]>x||p[1]>y||indy<1||indz<0||p[2]>(z-1)){  // check range
                   out[i]=0;                                    // set to zero if outside range, I'm interpolating, not extrapolating.
                 }else{                                         // otherwise...
                   double dx = p[0]-indx;                        // difference between point and floor(point) forms the spline polynomial
@@ -209,11 +215,10 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
                   zp[2] = (dcuz-dsqz-dz+1)/-2.0+2.0/3.0;       //...same as y
                   zp[3] = dcuz/6.0;
                   
-                  
+                  double zit;
                   for(int k = -1; k<3; k++){                   // loop over z polynomial
-                    int cz = indz+k;                           // find the coordinate for the appropriate coefficients
-                    if(cz==(z+2)){cz=z+1;}                     // check if coordinate outside range then reset it to be within range
-                    double zit = zp[k+1];                      // pick the appropriate polynomial
+                    int cz = indz+k+1;                           // find the coordinate for the appropriate coefficients
+                    zit = zp[k+1];
                     
                     for(int j = -1; j<3; j++){                 // loop over y polynomial
                       int cy  = indy+j;
@@ -233,6 +238,6 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
                 
                 out[i]/=6;                                     // divide by six in outer loop to prevent unnecessary divisions in inner loop
               }
-              return(out);                                     // Return NumericVector to R 
-}
+              return(out);
+              }
 
