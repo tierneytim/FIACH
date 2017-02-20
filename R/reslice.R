@@ -29,8 +29,5 @@ reslice<-function(data,newDim,currentDim=NULL,interpolation=3L){
   
   aff <- createAffine(scales = currentDim / newDim, source = targ)
   res <-applyAffine(source=data,aff=aff,update = TRUE)
-  if (!isImage(object = data, unsure = FALSE)) {
-    pixdim(res) <- newDim
-  }
   return(res)
 }

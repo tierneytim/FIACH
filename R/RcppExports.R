@@ -146,10 +146,15 @@ applyAffine <- function(source, aff,update=FALSE) {
   reg<-.Call('FIACH_applyAffine', PACKAGE = 'FIACH', yr=source, aff=voxAffine,outDim=outDim)
   
   if(update){
-  RNifti::sform(reg)<-structure(tx,code=2L)
-  RNifti::qform(reg)<-structure(tx,code=2L)
-  pixdim(reg)<-attr(aff,"targetPixdim")
-  }
+    targetHdr<-attr(aff,"targetHdr")
+   if(is.null(targetHdr)){
+      reg<-RNifti::updateNifti(reg,template = attr(aff,"sourceHdr"))
+      pixdim(reg)<-attr(aff,"targetPixdim")
+   }else{
+     reg<-updateNifti(reg,template = targetHdr)
+   }
+    }
+  
   return(reg)
 }
 .icombine<-function(X,dim){

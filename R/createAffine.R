@@ -29,7 +29,7 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
     stop("all scales hould be greater than zero")
   }
   
-  
+
   
   sourceXform<-RNifti::xform(source)
   sourceDim<-dim(source)
@@ -37,20 +37,21 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
   sourcePixdim<-RNifti::pixdim(source)
   
   if(is.null(target)){
-
+    targetHdr<-NULL
     targetXform<-sourceXform
     targetDim<-floor(scales*dim(source))
     targetPixdim<-sourcePixdim/scales
-    
     scaleMat<-diag(scales)
     targetXform[1:3,1:3]<-solve(scaleMat)%*%targetXform[1:3,1:3]
     scales<-c(1,1,1)
-    
   }else{
     targetXform<-RNifti::xform(target)
     targetDim<-dim(target)
     targetPixdim<-pixdim(target)
+    targetHdr<-RNifti::dumpNifti(target)
   }
+  
+  
   affine <- diag(4)
   
   rotationX <- rotationY <- rotationZ <- skewMatrix <- diag(3)
@@ -69,6 +70,8 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
   attr(affine,"targetDim")<-targetDim
   attr(affine,"sourcePixdim")<-sourcePixdim
   attr(affine,"targetPixdim")<-targetPixdim
+  attr(affine,"sourceHdr")<-sourceHdr
+  attr(affine,"targetHdr")<-targetHdr
   class(affine)<-"FIACHAffine"
   return(affine)
 } 
