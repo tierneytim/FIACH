@@ -10,35 +10,50 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
   //////////////////////////////////////////////////////
   ////// Coefficient Cube Construction /////////////////                   
   //////////////////////////////////////////////////////
-  Rcpp::NumericVector arrayDims = yr.attr("dim");
+  Rcpp::IntegerVector arrayDims = yr.attr("dim");
   int x = arrayDims[0];
   int y = arrayDims[1];
   int z = arrayDims[2];
-  //  int xy = x*y;                                   // needed for later when determining lcoation from pointer index
-  arma::cube temp(yr.begin(),x,y,z,false,false);  // need arma cube as NumericVector doesn't allow 3d Access. e.g yr(i,j,k)
-  //arma::cube coeffx = arma::zeros(x+2, y+2,z+2);  // Coefficient cube has n+2 elements in each dimension due to zeroth and nth +1 element
-  arma::cube coeffx = arma::zeros(x+2, y+2,z+4);  // Coefficient cube has n+2 elements in each dimension due to zeroth and nth +1 element
+  
+  // need arma cube as NumericVector doesn't allow 3d Access. e.g yr(i,j,k)
+  arma::cube temp(yr.begin(),x,y,z,false,false);  
   
 
+  /* Coefficient cube has n+4 elements in each dimension 
+   * due to zeroth and nth +1 element and zero padding for controlling edge effects
+   */
+  arma::cube coeffx = arma::zeros(x+4, y+4,z+4);  
+  
+  
   for(int k = 0;k<(z);k++){ 
     for(int j = 0;j<(y);j++){ 
       for(int i = 0;i<(x);i++){
-        coeffx.at(i+1,j+1,k+2) = temp.at(i,j,k);  // fill cube with zero padding for edge coefficients
+        /* place the data in the middle of the cube of zeros.
+         * This effectively zero pads the data.
+         */
+        coeffx.at(i+2,j+2,k+2) = temp.at(i,j,k);  
       }
     }
   }
   
-
+  // update lengths to reflect zero padding
+  x+=2; 
+  y+=2;
+  z+=2;
   //////////////////////////////////////////////////////
   ////// Spline Coefficient Calculation/////////////////                   
   //////////////////////////////////////////////////////
   
   /* spline coefficients in each dimension can be represented by a 
-  * difference equation applied in one direction followed by the reverse.
-  * see Unser, M., Aldroubi, A, & Eden, M. (1993). B-Spline Signal-Processing .1. Theory. Ieee Transactions on Signal Processing. 
-  * and Unser, M., Aldroubi, A., & Eden, M. (1991). Fast B-Spline Transforms for Continuous Image Representation and Interpolation. IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(3), 277–285. 
-  */
-  z+=2;
+   * difference equation applied in one direction followed by the reverse.
+   * see Unser, M., Aldroubi, A, & Eden, M. (1993). B-Spline Signal-Processing .1. Theory. Ieee Transactions on Signal Processing. 
+   * and Unser, M., Aldroubi, A., & Eden, M. (1991). Fast B-Spline Transforms for Continuous Image Representation and Interpolation. IEEE Transactions on Pattern Analysis and Machine Intelligence, 13(3), 277–285. 
+   */
+  
+
+  /* note the value of gi  converges rapidly to the absolute value 
+   * of the pole of the filter which is -2-sqrt(3). 
+   */
   Rcpp::NumericVector g1(x);
   Rcpp::NumericVector g2(y);
   Rcpp::NumericVector g3(z);
@@ -49,6 +64,43 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
   for(int i=1;i<x;i++){g1[i]=1/(4-g1[i-1]);}
   for(int i=1;i<y;i++){g2[i]=1/(4-g2[i-1]);}
   for(int i=1;i<z;i++){g3[i]=1/(4-g3[i-1]);}
+  
+  /*The B-spline interpolator is an Infinite Impulse Response Filter.
+   *  In  B-spline interpolation the data is  represented by a  convolution(*)
+   * of a set of unknown coefficients (c) with B-spline Kernels(B). 
+   * 
+   * y = c * B
+   * 
+   * c can be obtained by deconvolution.
+   * 
+   * the deconvolution can be performed by applying the difference equation defined
+   * by the  inverse of the z-transform of B to the data y.
+   * The  symmetric cubic B-spline kernel has the z trasform:
+   * 
+   * z+4+z^-1
+   * --------
+   *    6
+   *
+   * 
+   * The difference equation is c[i]= (y[i]*6-c[i-1])*pole in the forward direction.
+   * However, we initialise c to be y. Therefore the difference equation updates to 
+   *  
+   *   c[i]= (c[i]*6-c[i-1])*pole 
+   * 
+   * This prevents the copying of large arrays.
+   * Then in the negative direction the difference equation is
+   * 
+   *   c[i] = c[i]-pole*c[i+1].
+   *  
+   *  edge coefficients are create using natrual splines.
+   *  
+   *  c[0]=2c[1]-c[2]
+   *  c[n] = 2c[n-1]-c[n-2]
+   *  
+   * however prior to coefficent calcualtion the coefficient array is zero padded.
+   * This allows for accruate values to computed when the signal touches the border.
+   */  
+  
   
   //Loop forward in X//
 #ifdef _OPENMP
@@ -144,100 +196,145 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
               = 2*coeffx(arma::span(0,x+1),arma::span(0,y+1),arma::span(z,z))
               -coeffx(arma::span(0,x+1),arma::span(0,y+1),arma::span(z-1,z-1)); 
               
-          
+              
               //////////////////////////////////////////////////////
               //////            Spline interpolation           /////                   
               //////////////////////////////////////////////////////
-              int sumOutDim = arma::sum(outDim);
-              arma::mat44 sa = arma::inv(aff);
               
-              if(sumOutDim==0){
-                arma::mat subAff = aff(arma::span(0,2),arma::span(0,2));
-                arma::mat cpAff = subAff.t()*subAff;
-                double scaleX = sqrt(cpAff.at(0,0));
-                double scaleY = sqrt(cpAff.at(1,1)-cpAff.at(0,1)*cpAff.at(0,1)/cpAff.at(0,0));
-                double scaleZ = sqrt(arma::det(cpAff))/(scaleX*scaleY);
-                outDim[0] = round(scaleX*x);
-                outDim[1] = round(scaleY*y);
-                outDim[2] = round(scaleZ*z);
-              }
-              
-              int outxy = outDim[0]*outDim[1];
-              Rcpp::Dimension d(outDim[0],outDim[1],outDim[2]);                // get the dim object
+              // create the output vector
+              Rcpp::Dimension d(outDim[0],outDim[1],outDim[2]);                
               Rcpp::NumericVector out(d); 
               int nout = out.size();
               
+              // inversion necessary to apply the transform to the coordinates
+              arma::mat44 sa = arma::inv(aff);
+              
+              /* how many elements in each slice?
+               * this is necessary to determine the coordinate 
+               * I am at on each iteration as I do not fill the output 
+               * usign array indexing out(i,j,k) but with pointers, out[i].
+               */
+              int outxy = outDim[0]*outDim[1];
+              
+// make it run in parallel... for "IMPRESSIVE" speedp              
 #ifdef _OPENMP
 #pragma omp parallel for
-#endif                        // make it run in parallel... for "IMPRESSIVE" speedp
-              for(int i = 0; i<nout;i++){       // loop over requested points and...
+#endif                        
+              // loop over requested points and...
+              for(int i = 0; i<nout;i++){       
+                
                 arma::vec ip(4);
-                ip[3] = 1;                      //Homogenous coordinate 
-                ip[2] = i/outxy;                 // 
+                /* this calcualtes the coordinate I'm at
+                 * by first finding the slice number
+                 * then the column nad finally the row
+                 * ip[3] = 1 ensures the coordiantes are homogenous
+                 */
+                
+                ip[3] = 1;                       
+                ip[2] = i/outxy;                  
                 int temp = i % outxy;
                 ip[1] = temp/outDim[0];
                 ip[0] = (temp % outDim[0]);
                 
+                /* trasform the coordinate using the inverse affine matrix
+                 * also the index starts at 1 so 1 is added to each point.
+                 */
                 arma::vec p = sa * ip;
                 p+=1;
-                int indx = (int)p[0];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
-                int indy = (int)p[1];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
-                int indz = (int)p[2];             // cast to int to achieve faster flooring (hopefully int is always 32 bit)
                 
-               // bool inRangeZ = indz>=1  && p[2]<=z;
-                if(indx<1||p[0]>x||p[1]>y||indy<1||indz<0||p[2]>(z-1)){  // check range
-                  out[i]=0;                                    // set to zero if outside range, I'm interpolating, not extrapolating.
-                }else{                                         // otherwise...
-                  double dx = p[0]-indx;                        // difference between point and floor(point) forms the spline polynomial
-                  double dsqx = dx*dx;                         // square part of the x polynomial
-                  double dcux = dsqx*dx;                       // cube part of the polynomial
-                  double dx3 = dx*3;                           // multiply by 3 so not multiplyin withing nested for loop(saves 15 multiplications per iteration)
-                  double dsqx3 = dsqx*3;                       // multiply by 3 so not multiplyin withing nested for loop(saves 15 multiplications per iteration)
+                /* cast to int to achieve faster flooring
+                 * Negative points are always ignored so 
+                 * this should work.
+                 */
+                int indx = (int)p[0];             
+                int indy = (int)p[1];             
+                int indz = (int)p[2]; 
+               // Rcpp::Rcout<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
+                
+                // check range
+                if(p[0]<0||p[0]>=(x-1)||p[1]>=(y-1)||p[1]<0||p[2]<0||p[2]>=(z-1)){  
+                  // set to zero if outside range, I'm interpolating, not extrapolating.
+                  out[i]=0;                                    
+                }else{                                         
                   
-                  double dy = p[1]-indy;                       //...same as x
-                  double dsqy = dy*dy;                         //...same as x
-                  double dcuy = dsqy*dy;                       //...same as x
+                  /* difference between point and floor(point) is the distance between voxels.
+                   * This is the linear portion of the polynomial
+                   */
+                  double dx = p[0]-indx;                       
                   
-                  double yp[4];                                // holds  y B-spline polynomial
-                  yp[0] = (dcuy-3*dsqy +3*dy-1)/-6.0;          // at index 1
-                  yp[1] = (dcuy-2*dsqy)/2.0+2.0/3.0;           // at index 2
-                  yp[2] = (dcuy-dsqy-dy+1)/-2.0+2.0/3.0;       // at index 3
-                  yp[3] = dcuy/6.0;                            // at index 4... zero outside this range so therefore the B-spline is shifted(that's why points are floored)
+                  // square part of the x polynomial
+                  double dsqx = dx*dx;                         
                   
+                  // cube part of the polynomial
+                  double dcux = dsqx*dx;                       
                   
-                  double dz = p[2]-indz;                       //...same as y
-                  double dsqz = dz*dz;                         //...same as y
-                  double dcuz = dsqz*dz;                       //...same as y
+                  /* multiply square and cubic term by 3. 
+                   * Therefore I'm not multiplying withing nested for loop.
+                   * This saves 30 multiplications per iteration.
+                   */
+                  double dx3 = dx*3;                           
+                  double dsqx3 = dsqx*3;                       
                   
-                  double zp[4];                                //...same as y
-                  zp[0] = (dcuz-3*dsqz +3*dz-1)/-6.0;          //...same as y
-                  zp[1] = (dcuz-2*dsqz)/2.0+2.0/3.0;           //...same as y
-                  zp[2] = (dcuz-dsqz-dz+1)/-2.0+2.0/3.0;       //...same as y
+                  // linear, square and cubic terms
+                  double dy = p[1]-indy;                       
+                  double dsqy = dy*dy;                         
+                  double dcuy = dsqy*dy;                       
+                  
+                  // y B-spline polynomial at the four points
+                  double yp[4];                                
+                  yp[0] = (dcuy-3*dsqy +3*dy-1)/-6.0;          
+                  yp[1] = (dcuy-2*dsqy)/2.0+2.0/3.0;           
+                  yp[2] = (dcuy-dsqy-dy+1)/-2.0+2.0/3.0;       
+                  yp[3] = dcuy/6.0;                            
+                  
+                  // linear, square and cubic terms
+                  double dz = p[2]-indz;                       
+                  double dsqz = dz*dz;                         
+                  double dcuz = dsqz*dz;                       
+                  
+                  // z B-spline polynomial at the four points
+                  double zp[4];                                
+                  zp[0] = (dcuz-3*dsqz +3*dz-1)/-6.0;          
+                  zp[1] = (dcuz-2*dsqz)/2.0+2.0/3.0;           
+                  zp[2] = (dcuz-dsqz-dz+1)/-2.0+2.0/3.0;       
                   zp[3] = dcuz/6.0;
                   
                   double zit;
-                  for(int k = -1; k<3; k++){                   // loop over z polynomial
-                    int cz = indz+k+1;                           // find the coordinate for the appropriate coefficients
-                    zit = zp[k+1];
+                  for(int k = 0; k<4; k++){  
+                    // set the coordinate amd the polynomial
+                    int cz = indz+k;         
+                    zit = zp[k];
                     
-                    for(int j = -1; j<3; j++){                 // loop over y polynomial
+                    for(int j = 0; j<4; j++){                 
                       int cy  = indy+j;
-                      double ci = coeffx.at(indx-1,cy,cz);     // find the first coefficient 
-                      double cj = coeffx.at(indx,cy,cz);       // find the second coefficient
-                      double ck = coeffx.at(indx+1,cy,cz);     // find the third coefficient
-                      double cl = coeffx.at(indx+2,cy,cz);     // find the fourth coefficient
-                      double pi = -ci+3*(cj-ck)+cl;            // Construct the coefficiets of the polynomial in X
-                      double pj = ci-2*cj+ck;                  // Construct the coefficiets of the polynomial in X
-                      double pk = -ci+ck;                      // Construct the coefficiets of the polynomial in X
-                      double pl =  pj+6*cj;                    // Construct the coefficiets of the polynomial in X
-                      out[i]+=(dcux*pi+dsqx3*pj+dx3*pk+pl)*yp[j+1]*zit; //explicitly construct the polynomial and accumalate over all j and k iterations 
+                      
+                      // the relevant spline coefficients
+                      double ci = coeffx.at(indx,cy,cz);     
+                      double cj = coeffx.at(indx+1,cy,cz);    
+                      double ck = coeffx.at(indx+2,cy,cz);    
+                      double cl = coeffx.at(indx+3,cy,cz);    
+                      
+                      /* The polynomial coefficeints (a,b,c,d)
+                       * ax^3 +bx^2+cx+d
+                       */
+                      double pi = -ci+3*(cj-ck)+cl;            
+                      double pj = ci-2*cj+ck;                 
+                      double pk = -ci+ck;                     
+                      double pl =  pj+6*cj;                   
+                      
+                      //explicitly construct the polynomial and accumalate over all j and k iterations 
+                      out[i]+=(dcux*pi+dsqx3*pj+dx3*pk+pl)*yp[j]*zit; 
                     }
                     
                   }
                 }
-                
-                out[i]/=6;                                     // divide by six in outer loop to prevent unnecessary divisions in inner loop
+                /* divide by six in outer loop. 
+                 * This prevents unnecessary divisions in inner loop
+                 * this factor is simply the denominator of the transfer 
+                 * function of the B-spline kernel
+                 */
+                out[i]/=6;                                     
               }
               return(out);
-              }
+}
 
