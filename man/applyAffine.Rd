@@ -6,12 +6,14 @@ Apply an Affine Matrix
 \description{
 This function Transforms the \code{source} image using a prespecified affine matrix.}
 \usage{
-applyAffine(source,aff)
+applyAffine(source,aff,update=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
 \item{source}{The source image for the transformation.}
 \item{aff}{an Affine matrix as porduced by \code{\link{createAffine}}  }
+\item{update}{Logical indicating whether or not the result should have nifti meta data.}
+
 }
 
 
