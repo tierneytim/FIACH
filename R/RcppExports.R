@@ -143,17 +143,19 @@ applyAffine <- function(source, aff,update=FALSE) {
   sx<-attr(aff,"sourceXform")
   voxAffine<-solve(tx)%*%aff%*%sx
   outDim<-attr(aff,"targetDim")
-  reg<-.Call('FIACH_applyAffine', PACKAGE = 'FIACH', yr=source, aff=voxAffine,outDim=outDim)
+  targetHdr<-attr(aff,"targetHdr")
   
-  if(update){
-    targetHdr<-attr(aff,"targetHdr")
-   if(is.null(targetHdr)){
-      reg<-RNifti::updateNifti(reg,template = attr(aff,"sourceHdr"))
-      pixdim(reg)<-attr(aff,"targetPixdim")
-   }else{
-     reg<-updateNifti(reg,template = targetHdr)
-   }
-    }
+  reg<-.Call('FIACH_applyAffine', PACKAGE = 'FIACH', yr=source, aff=voxAffine,outDim=outDim,hdr=targetHdr)
+  
+  # if(update){
+  #   targetHdr<-attr(aff,"targetHdr")
+  #  if(is.null(targetHdr)){
+  #     reg<-RNifti::updateNifti(reg,template = attr(aff,"sourceHdr"))
+  #     pixdim(reg)<-attr(aff,"targetPixdim")
+  #  }else{
+  #    reg<-updateNifti(reg,template = targetHdr)
+  #  }
+  #   }
   
   return(reg)
 }

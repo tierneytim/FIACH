@@ -1,12 +1,21 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
+// [[Rcpp::depends(RNifti)]]
+#include "RNifti.h"
+#include "RNiftiAPI.h"
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
+#define NDEBUG
+
+
 // [[Rcpp::export]]
-Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec outDim){
+//Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec outDim){
+SEXP applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec outDim, SEXP hdr){
+    
   //////////////////////////////////////////////////////
   ////// Coefficient Cube Construction /////////////////                   
   //////////////////////////////////////////////////////
@@ -212,9 +221,15 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
   //////////////////////////////////////////////////////
   
   // create the output vector
-  Rcpp::Dimension d(outDim[0],outDim[1],outDim[2]);                
-  Rcpp::NumericVector out(d); 
-  int nout = out.size();
+ // Rcpp::Dimension d(outDim[0],outDim[1],outDim[2]);                
+  //Rcpp::NumericVector out(d); 
+  RNifti::NiftiImage image(hdr);
+  int nout = image->nvox;
+  image->datatype = 64;
+  image->data = calloc(1, nout*sizeof(double));
+  double *dPtr = static_cast<double*>(image->data);
+  
+  //int nout = out.size();
   
   // inversion necessary to apply the transform to the coordinates
   arma::mat44 sa = arma::inv(aff);
@@ -264,7 +279,8 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
     // check range
     if(p[0]<0||p[0]>=(x-1)||p[1]>=(y-1)||p[1]<0||p[2]<0||p[2]>=(z-1)){  
       // set to zero if outside range, I'm interpolating, not extrapolating.
-      out[i]=0;                                    
+      //out[i]=0;
+      *(dPtr+i)=0;
     }else{                                         
       
       /* difference between point and floor(point) is the distance between voxels.
@@ -333,7 +349,8 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
           double pl =  pj+6*cj;                   
           
           //explicitly construct the polynomial and accumalate over all j and k iterations 
-          out[i]+=(dcux*pi+dsqx3*pj+dx3*pk+pl)*yp[j]*zit; 
+          //out[i]+=(dcux*pi+dsqx3*pj+dx3*pk+pl)*yp[j]*zit;
+          *(dPtr+i)+=(dcux*pi+dsqx3*pj+dx3*pk+pl)*yp[j]*zit;
         }
         
       }
@@ -343,8 +360,12 @@ Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr,arma::mat aff,arma::ivec 
      * this factor is simply the denominator of the transfer 
      * function of the B-spline kernel
      */
-    out[i]/=6;                                     
+    //out[i]/=6;
+    *(dPtr+i)/=6;
   }
+
+  SEXP out =image.toArray();
+  
+  //image.setPersistence(true);
   return(out);
 }
-

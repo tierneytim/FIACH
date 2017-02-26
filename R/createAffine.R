@@ -37,12 +37,18 @@ createAffine<-function (translation = c(0,0,0), scales = c(1,1,1), skews = c(0,0
   sourcePixdim<-RNifti::pixdim(source)
   
   if(is.null(target)){
-    targetHdr<-NULL
+    targetHdr<-sourceHdr
     targetXform<-sourceXform
     targetDim<-floor(scales*dim(source))
     targetPixdim<-sourcePixdim/scales
     scaleMat<-diag(scales)
     targetXform[1:3,1:3]<-solve(scaleMat)%*%targetXform[1:3,1:3]
+    targetHdr$dim[2:4]<-targetDim
+    targetHdr$pixdim[2:4]<-targetPixdim
+    targetHdr$srow_x<-targetXform[1,]
+    targetHdr$srow_y<-targetXform[2,]
+    targetHdr$srow_z<-targetXform[3,]
+    
     scales<-c(1,1,1)
   }else{
     targetXform<-RNifti::xform(target)

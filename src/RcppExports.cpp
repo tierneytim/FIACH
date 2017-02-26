@@ -298,15 +298,16 @@ RcppExport SEXP FIACH_hextest(SEXP inputSEXP, SEXP paletteSEXP, SEXP currentmaxS
   END_RCPP
 }
 // applyAffine
-Rcpp::NumericVector applyAffine(Rcpp::NumericVector yr, arma::mat aff,arma::ivec outDim);
-RcppExport SEXP FIACH_applyAffine(SEXP yrSEXP, SEXP affSEXP, SEXP outDimSEXP) {
+SEXP applyAffine(Rcpp::NumericVector yr, arma::mat aff,arma::ivec outDim,SEXP hdr);
+RcppExport SEXP FIACH_applyAffine(SEXP yrSEXP, SEXP affSEXP, SEXP outDimSEXP, SEXP hdrSEXP) {
   BEGIN_RCPP
   Rcpp::RObject __result;
   Rcpp::RNGScope __rngScope;
   Rcpp::traits::input_parameter< Rcpp::NumericVector >::type yr(yrSEXP);
   Rcpp::traits::input_parameter< arma::mat >::type aff(affSEXP);
   Rcpp::traits::input_parameter< arma::ivec >::type outDim(outDimSEXP);
-  __result = Rcpp::wrap(applyAffine(yr, aff,outDim));
+  Rcpp::traits::input_parameter< SEXP >::type hdr(hdrSEXP);
+  __result = applyAffine(yr, aff,outDim,hdr);
   return __result;
   END_RCPP
 }
