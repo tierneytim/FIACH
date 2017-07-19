@@ -82,7 +82,7 @@
   return(mask.arr)
 }
 
-fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=TRUE,quantileMask=.7){
+fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=TRUE,externalMask=NULL,quantileMask=.7){
   ################################################################
   ########### DIA DHUIT A CHARA, CHONAS ATA TU? ##################
   ########### BHUEL NA BI AG CAOINE.            ##################
@@ -101,6 +101,12 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   if(!is.character(rp)){stop("rp should be a character strings")}
   if(length(rp)>1){stop("Only one rp file should be specified")}
   if(!file.exists(rp)){stop("The specified rp file does not exist")}
+  }
+  if(!is.null(externalMask)){
+    extmaskused = TRUE
+    if(!is.character(externalMask)){stop("mask should be a character strings")}
+    if(length(externalMask)>1){stop("Only one mask file should be specified")}
+    if(!file.exists(externalMask)){stop("The specified mask file does not exist")}
   }
   if(length(input)<1){stop("At least one functional file must be specified")}
   if(!is.character(input)){stop("input should be character strings")}
@@ -139,16 +145,26 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   #####################################
   ######## MASK CREATION ##############
   #####################################
-  meds<-colMedian(mat)                                                                                             
-  mask.mat<-kmeansMask(meds,retFit = TRUE)
-  fit<-mask.mat$fit
-  mask.mat<-mask.mat$mask
-  vf<-sum(mask.mat)/length(mask.mat)
-  if(fit<.8||!defaultMask){
-    print("As the k-means clustering did not have a good fit the mask was construced using quantiles. Is there a large receive field bias in your data?")
-    cut<-mean(meds)*quantileMask
-    mask.mat<-ifelse(meds<=cut,0,1)
+  meds<-colMedian(mat)  
+  if(is.null(externalMask)){
+    mask.mat<-kmeansMask(meds,retFit = TRUE)
+    fit<-mask.mat$fit
+    mask.mat<-mask.mat$mask
+    vf<-sum(mask.mat)/length(mask.mat)
+    if(fit<.8||!defaultMask){
+      print("As the k-means clustering did not have a good fit the mask was construced using quantiles. Is there a large receive field bias in your data?")
+      cut<-mean(meds)*quantileMask
+      mask.mat<-ifelse(meds<=cut,0,1)
     }
+  }else{
+    extmask<-readNii(externalMask)
+    mask<-as.numeric(zeroNa(arrMat(extmask)))
+    if(length(mask)!=nvox){stop("external mask must be same size as functional images")}
+    #Still uses quantileMask as threshold
+    #If the volume is too small, some data are never measured, which creates division by zero later on.
+    #So, median of voxel in the time series should be above 0
+    mask.mat<-ifelse(mask>quantileMask&meds>0,1,0)
+  }
   mask.arr<-matArr(mask.mat,dim=c(dim(data)[1:3],1)) 
   small.brain<-mat[,mask.mat==1]
   print("Brain Extraction Completed")
@@ -263,7 +279,7 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   scrubbed.brain<-filt.brain
   scrubbed.brain[scrub.inds]<-brain.meds[scrub.inds[,2]]
   output.brain.mat<-hp.mat                                                                    
-  #output.brain.mat[,which(mask.mat==FALSE)]<-0                                           
+  output.brain.mat[,which(mask.mat==FALSE)]<-0                                           
   output.brain.mat[,which(mask.mat==TRUE)]<-scrubbed.brain                               
   mov.arr<-matArr(output.brain.mat, dim(data))  
   print("Data Corrected... File Writing Begins")
