@@ -279,7 +279,9 @@ fiach <-function(input,t,tr,rp=NULL,maxgap=1,freq=128,nMads = 1.96,defaultMask=T
   scrubbed.brain<-filt.brain
   scrubbed.brain[scrub.inds]<-brain.meds[scrub.inds[,2]]
   output.brain.mat<-hp.mat                                                                    
-  output.brain.mat[,which(mask.mat==FALSE)]<-0                                           
+  if (extmaskused==TRUE){
+    output.brain.mat[,which(mask.mat==FALSE)]<-0  
+  }
   output.brain.mat[,which(mask.mat==TRUE)]<-scrubbed.brain                               
   mov.arr<-matArr(output.brain.mat, dim(data))  
   print("Data Corrected... File Writing Begins")
